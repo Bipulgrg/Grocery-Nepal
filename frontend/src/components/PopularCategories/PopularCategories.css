@@ -1,0 +1,19 @@
+.popular-categories {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0 60px;
+  }
+  
+  .category {
+    text-align: center;
+  }
+
+.icon-green {
+    color: #16A34A;
+    font-size: 20px;
+  }
+  
+  p{
+    font-size: 15px;
+  }
+  

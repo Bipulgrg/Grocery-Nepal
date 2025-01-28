@@ -1,7 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { login } from '../../api/auth';
 import './signin.css';
 
 const SignIn = () => {
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const response = await login(formData);
+      alert(response.message);
+      localStorage.setItem('token', response.token);
+      window.location.href = "/";
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid Credentials');
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -9,23 +31,22 @@ const SignIn = () => {
         <p className="auth-subtitle">Enter your details</p>
 
         <button className="google-btn">
-            <div className="google-icon"> 
+          <div className="google-icon">
             <img src="/google.png" alt="Google Icon"/>
-            </div>
-             Continue with Google
+          </div>
+          Continue with Google
         </button>
-
 
         <div className="divider">
           <span>or</span>
         </div>
 
-        <form className="auth-form">
-          <input type="text" placeholder="Phone Number" />
-          <input type="email" placeholder="Email Address" />
-          <input type="password" placeholder="Password" />
+        {error && <p className="error-message">{error}</p>}
 
-          <button type="submit" className="auth-submit-btn">Signin</button>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <input type="email" name="email" placeholder="Email Address" onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+          <button type="submit" className="auth-submit-btn">Sign In</button>
         </form>
 
         <p className="auth-footer">

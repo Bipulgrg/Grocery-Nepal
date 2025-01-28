@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './nav.css';
 
 const Nav = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
   return (
     <nav className="navbar">
       <div className="logo">
@@ -15,12 +28,18 @@ const Nav = () => {
         <li><Link to="/about">About</Link></li>
       </ul>
       <div className="nav-buttons">
-        <Link to="/signin">
-          <button className="signin">Sign In</button>
-        </Link>
-        <Link to="/signup">
-          <button className="signup">Sign Up</button>
-        </Link>
+        {!isLoggedIn ? (
+          <>
+            <Link to="/signin">
+              <button className="signin">Sign In</button>
+            </Link>
+            <Link to="/signup">
+              <button className="signup">Sign Up</button>
+            </Link>
+          </>
+        ) : (
+          <button className="signout" onClick={handleSignOut}>Sign Out</button>
+        )}
       </div>
     </nav>
   );

@@ -11,11 +11,14 @@
 }
 
 h1,
-h2 {
+h2,h3,h4,h5,h6 {
   font-family: "Josefin Sans", sans-serif;
 }
 
 p,
 a {
+  font-family: "Poppins", sans-serif;
+}
+button{
   font-family: "Poppins", sans-serif;
 }

@@ -50,6 +50,10 @@ const SignIn = () => {
         </form>
 
         <p className="auth-footer">
+          <a href="/forgot-password" className="forgot-password">Forgot Password?</a>
+        </p>
+
+        <p className="auth-footer">
           Don't have an account? <a href="/signup">Sign up</a>
         </p>
       </div>

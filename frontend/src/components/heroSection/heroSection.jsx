@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './heroSection.css';
 
 const Hero = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Searching for:', searchTerm);
+    navigate(`/recipes?q=${encodeURIComponent(searchTerm)}`);
   };
 
   return (
@@ -26,9 +28,7 @@ const Hero = () => {
           <button type="submit" className="search-btn">
             <i className="fas fa-search"></i>
           </button>
-
         </form>
-
       </div>
     </section>
   );

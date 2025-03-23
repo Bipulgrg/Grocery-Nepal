@@ -26,6 +26,7 @@ connectDB();
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/recipes', require('./routes/recipes'));
 
 // Start server
 const PORT = process.env.PORT || 5000;

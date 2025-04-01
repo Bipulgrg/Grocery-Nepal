@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import "./RecipeList.css";
 
 const ITEMS_PER_PAGE = 6;
@@ -7,13 +7,26 @@ const ITEMS_PER_PAGE = 6;
 const RecipeList = () => {
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("category") || "";
 
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const categories = [
+    'All',
+    'Quick Meals',
+    'Vegetarian',
+    'Healthy',
+    'Desserts',
+    'Breakfast',
+    'Drinks',
+    'Snacks'
+  ];
 
   // Handle search input changes
   const handleSearchChange = (e) => {
@@ -24,20 +37,39 @@ const RecipeList = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setSearch(searchInput);
+    setCurrentPage(1); // Reset to first page on new search
+  };
+
+  // Handle category selection
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category === 'All' ? '' : category);
+    setCurrentPage(1); // Reset to first page on category change
   };
 
   useEffect(() => {
     setSearch(initialSearch);
     setSearchInput(initialSearch);
-  }, [initialSearch]);
+    setSelectedCategory(initialCategory);
+  }, [initialSearch, initialCategory]);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
         setLoading(true);
-        const url = search
-          ? `http://localhost:5000/api/recipes/search?query=${encodeURIComponent(search)}`
-          : 'http://localhost:5000/api/recipes';
+        let url = 'http://localhost:5000/api/recipes';
+        const params = new URLSearchParams();
+        
+        if (search) {
+          params.append('query', search);
+        }
+        if (selectedCategory) {
+          params.append('category', selectedCategory);
+        }
+        
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch recipes');
@@ -52,7 +84,7 @@ const RecipeList = () => {
     };
 
     fetchRecipes();
-  }, [search]);
+  }, [search, selectedCategory]);
 
   const totalPages = Math.ceil(recipes.length / ITEMS_PER_PAGE);
   const paginatedRecipes = recipes.slice(
@@ -76,21 +108,35 @@ const RecipeList = () => {
           <i className="fas fa-search"></i>
         </button>
       </form>
-      <div className="recipe-list">
-        {paginatedRecipes.map((recipe) => (
-          <div className="recipe-card" key={recipe._id}>
-            <img src={recipe.image} alt={recipe.name} className="recipe-image" />
-            <div className="recipe-info">
-              <span className="time-tag">{recipe.time}</span>
-              <span className="difficulty">{recipe.difficulty}</span>
-              <h3>{recipe.name}</h3>
-              <a href="#" className="add-to-cart">
-                Add to Cart
-              </a>
-            </div>
-          </div>
+
+      <div className="category-filter">
+        {categories.map((category) => (
+          <button
+            key={category}
+            className={`category-btn ${selectedCategory === (category === 'All' ? '' : category) ? 'active' : ''}`}
+            onClick={() => handleCategoryChange(category)}
+          >
+            {category}
+          </button>
         ))}
       </div>
+
+      <div className="recipe-list">
+        {paginatedRecipes.map((recipe) => (
+          <Link to={`/purchase/${recipe._id}`} key={recipe._id} className="recipe-link">
+            <div className="recipe-card">
+              <img src={recipe.image} alt={recipe.name} className="recipe-image" />
+              <div className="recipe-info">
+                <span className="time-tag">{recipe.time}</span>
+                <span className="difficulty">{recipe.difficulty}</span>
+                <h3>{recipe.name}</h3>
+                <span className="category-tag">{recipe.category}</span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
       <div className="pagination">
         <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
           &lt;

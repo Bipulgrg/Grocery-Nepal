@@ -1,0 +1,186 @@
+.dashboard {
+  padding: 40px;
+}
+
+.dashboard h1 {
+  margin-bottom: 40px;
+  color: #1f2937;
+  font-size: 2em;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.stat-content h3 {
+  color: #6b7280;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.stat-content p {
+  color: #1f2937;
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+/* Stat card variations */
+.stat-card.orders .stat-icon {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.stat-card.pending .stat-icon {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stat-card.recipes .stat-icon {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stat-card.ingredients .stat-icon {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* Recent Orders Section */
+.recent-orders {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  color: #1f2937;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.view-all {
+  color: #16a34a;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.view-all:hover {
+  color: #15803d;
+}
+
+.orders-table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  padding: 16px 12px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.status-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: white;
+  text-transform: capitalize;
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.1em;
+  color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .recent-orders {
+    padding: 16px;
+  }
+
+  .orders-table {
+    margin: 0 -16px;
+  }
+
+  table {
+    font-size: 0.9em;
+  }
+
+  th, td {
+    padding: 12px 8px;
+  }
+} 

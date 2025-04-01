@@ -26,7 +26,6 @@ const Nav = () => {
         <li><Link to="/recipes">Recipes</Link></li>
         <li><Link to="/categories">Categories</Link></li>
         <li><Link to="/about">About</Link></li>
-        <li><Link to="/admin">Admin</Link></li>
       </ul>
       <div className="nav-buttons">
         {!isLoggedIn ? (

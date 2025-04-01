@@ -1,71 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Admin.css';
 
 const Admin = () => {
   const [formData, setFormData] = useState({
     name: '',
+    category: 'Quick Meals',
     difficulty: 'Easy',
     time: '',
+    description: ''
   });
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState('');
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    fetchIngredients();
+  }, []);
+
+  const fetchIngredients = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/ingredients');
+      const data = await response.json();
+      setIngredients(data);
+    } catch (error) {
+      setError('Failed to fetch ingredients');
+    }
+  };
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: value
-    }));
+    });
+  };
+
+  const handleIngredientChange = (e) => {
+    const ingredientId = e.target.value;
+    const quantity = 1; // Default quantity
+    
+    if (!selectedIngredients.some(item => item.ingredient === ingredientId)) {
+      setSelectedIngredients([
+        ...selectedIngredients,
+        { ingredient: ingredientId, quantity }
+      ]);
+    }
+  };
+
+  const handleQuantityChange = (ingredientId, quantity) => {
+    setSelectedIngredients(selectedIngredients.map(item => 
+      item.ingredient === ingredientId 
+        ? { ...item, quantity: Number(quantity) }
+        : item
+    ));
+  };
+
+  const removeIngredient = (ingredientId) => {
+    setSelectedIngredients(selectedIngredients.filter(
+      item => item.ingredient !== ingredientId
+    ));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image size should be less than 5MB');
-        return;
-      }
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file');
-        return;
-      }
-      setImage(file);
-      setError('');
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    setImage(file);
+    setError('');
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
+
     if (!image) {
       setError('Please select an image');
       return;
     }
 
-    setIsSubmitting(true);
-    setError('');
-    setMessage('');
+    if (selectedIngredients.length === 0) {
+      setError('Please add at least one ingredient');
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('category', formData.category);
+    formDataToSend.append('difficulty', formData.difficulty);
+    formDataToSend.append('time', formData.time);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('image', image);
+    formDataToSend.append('ingredients', JSON.stringify(selectedIngredients));
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('image', image);
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('difficulty', formData.difficulty);
-      formDataToSend.append('time', formData.time);
-
       const response = await fetch('http://localhost:5000/api/recipes', {
         method: 'POST',
-        body: formDataToSend,
+        body: formDataToSend
       });
 
       const data = await response.json();
@@ -74,47 +125,66 @@ const Admin = () => {
         throw new Error(data.message || 'Failed to add recipe');
       }
 
-      setMessage('Recipe added successfully!');
+      setSuccess('Recipe added successfully!');
       setFormData({
         name: '',
+        category: 'Quick Meals',
         difficulty: 'Easy',
         time: '',
+        description: ''
       });
+      setSelectedIngredients([]);
       setImage(null);
       setPreview(null);
     } catch (err) {
-      setError(err.message || 'An error occurred while adding the recipe');
-    } finally {
-      setIsSubmitting(false);
+      setError(err.message);
     }
   };
 
   return (
     <div className="admin-container">
-      <h1>Add New Recipe</h1>
-      {message && <div className="success-message">{message}</div>}
-      {error && <div className="error-message">{error}</div>}
+      <h2>Add New Recipe</h2>
       
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
+
       <form onSubmit={handleSubmit} className="admin-form">
         <div className="form-group">
-          <label htmlFor="name">Recipe Name:</label>
+          <label>Recipe Name</label>
           <input
             type="text"
-            id="name"
             name="name"
             value={formData.name}
-            onChange={handleChange}
+            onChange={handleInputChange}
             required
+            placeholder="Enter recipe name"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="difficulty">Difficulty:</label>
+          <label>Category</label>
           <select
-            id="difficulty"
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="Quick Meals">Quick Meals</option>
+            <option value="Vegetarian">Vegetarian</option>
+            <option value="Healthy">Healthy</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Drinks">Drinks</option>
+            <option value="Snacks">Snacks</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Difficulty</label>
+          <select
             name="difficulty"
             value={formData.difficulty}
-            onChange={handleChange}
+            onChange={handleInputChange}
             required
           >
             <option value="Easy">Easy</option>
@@ -124,41 +194,89 @@ const Admin = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="time">Preparation Time:</label>
+          <label>Preparation Time</label>
           <input
             type="text"
-            id="time"
             name="time"
             value={formData.time}
-            onChange={handleChange}
-            placeholder="e.g., 30 min"
+            onChange={handleInputChange}
             required
+            placeholder="e.g., 30 min"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="image">Recipe Image:</label>
+          <label>Recipe Instructions</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            required
+            placeholder="Write detailed instructions on how to prepare this recipe..."
+            rows="6"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Ingredients</label>
+          <select
+            onChange={handleIngredientChange}
+            value=""
+          >
+            <option value="">Select an ingredient</option>
+            {ingredients.map(ingredient => (
+              <option key={ingredient._id} value={ingredient._id}>
+                {ingredient.name} (${ingredient.price}/{ingredient.unit})
+              </option>
+            ))}
+          </select>
+
+          {selectedIngredients.length > 0 && (
+            <div className="selected-ingredients">
+              {selectedIngredients.map(({ ingredient: ingredientId, quantity }) => {
+                const ingredientDetails = ingredients.find(i => i._id === ingredientId);
+                return (
+                  <div key={ingredientId} className="selected-ingredient">
+                    <span>{ingredientDetails?.name}</span>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => handleQuantityChange(ingredientId, e.target.value)}
+                      min="0"
+                      step="any"
+                    />
+                    <span>{ingredientDetails?.unit}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => removeIngredient(ingredientId)}
+                      className="remove-ingredient"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>Recipe Image</label>
           <input
             type="file"
-            id="image"
-            name="image"
             accept="image/*"
             onChange={handleImageChange}
             required
           />
           {preview && (
             <div className="image-preview">
-              <img src={preview} alt="Preview" />
+              <img src={preview} alt="Recipe preview" />
             </div>
           )}
         </div>
 
-        <button 
-          type="submit" 
-          className="submit-btn"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Adding Recipe...' : 'Add Recipe'}
+        <button type="submit" className="submit-button">
+          Add Recipe
         </button>
       </form>
     </div>

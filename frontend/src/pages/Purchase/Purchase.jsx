@@ -87,6 +87,7 @@ const Purchase = () => {
       setShowPaymentModal(false);
       setShowCodForm(true);
     } else if (method === 'khalti') {
+      setShowCodForm(true);
       alert('Redirecting to Khalti payment...');
       setShowPaymentModal(false);
     }

@@ -30,19 +30,24 @@
   color: #444;
 }
 
-.form-group input,
-.form-group select {
-  padding: 10px;
-  border: 1px solid #ddd;
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 1rem;
+  background-color: white;
+  color: #1f2937;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
   outline: none;
-  border-color: #16A34A;
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .form-group input[type="file"] {
@@ -59,12 +64,6 @@
   font-family: inherit;
   resize: vertical;
   min-height: 120px;
-}
-
-.form-group textarea:focus {
-  outline: none;
-  border-color: #16A34A;
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
 }
 
 .image-preview {
@@ -232,18 +231,65 @@
 .input-with-unit {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .input-with-unit input {
   flex: 1;
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  height: 48px;
 }
 
 .input-with-unit select {
   width: auto;
   min-width: 120px;
+  height: 48px;
+  padding: 0.75rem 1rem;
 }
 
 .input-with-unit span {
-  color: #666;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Ensure number input is clearly visible */
+.input-with-unit input[type="number"] {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1f2937;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+.input-with-unit input[type="number"]:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Remove any styles that might hide input values */
+.admin-form input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.admin-form input[type="number"]::-webkit-outer-spin-button,
+.admin-form input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ensure text is visible in inputs */
+.admin-form input::placeholder {
+  color: #9ca3af;
+}
+
+.admin-form input {
+  color: #1f2937;
+  background-color: white;
 } 

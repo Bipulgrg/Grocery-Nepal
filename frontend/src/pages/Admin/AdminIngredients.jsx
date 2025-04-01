@@ -85,7 +85,7 @@ const AdminIngredients = () => {
 
   return (
     <div className="admin-container">
-      <h2>Manage Ingredients</h2>
+      <h2>Add Ingredients</h2>
       
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}

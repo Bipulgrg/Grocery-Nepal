@@ -100,4 +100,48 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
+// Delete a recipe
+router.delete('/:id', async (req, res) => {
+  try {
+    const recipe = await Recipe.findByIdAndDelete(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+    res.json({ message: 'Recipe deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting recipe', error: error.message });
+  }
+});
+
+// Update a recipe
+router.put('/:id', async (req, res) => {
+  try {
+    const { name, category, difficulty, time, description, ingredients } = req.body;
+    
+    const recipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        category,
+        difficulty,
+        time,
+        description,
+        ingredients: ingredients.map(item => ({
+          ingredient: item.ingredient,
+          quantity: item.quantity
+        }))
+      },
+      { new: true }
+    ).populate('ingredients.ingredient');
+
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    res.json(recipe);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating recipe', error: error.message });
+  }
+});
+
 module.exports = router; 

@@ -5,15 +5,24 @@
     padding: 10px 20px;
     background-color: #fff;
     border-bottom: 1px solid #e0e0e0;
+    position: relative;
   }
   
   .logo h1 {
     color: #16A34A;
+    margin: 0;
+  }
+  
+  .nav-container {
+    display: flex;
+    align-items: center;
   }
   
   .nav-links {
     list-style: none;
     display: flex;
+    margin: 0;
+    padding: 0;
   }
   
   .nav-links li {
@@ -24,6 +33,11 @@
     text-decoration: none;
     color: #333;
     font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-links a:hover {
+    color: #16A34A;
   }
   
   .nav-buttons button {
@@ -32,6 +46,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
   
   .signin {
@@ -39,8 +54,92 @@
     color: #16A34A;
   }
   
+  .signin:hover {
+    background-color: rgba(22, 163, 74, 0.1);
+  }
+  
   .signup {
     background-color: #16A34A;
     color: #fff;
+  }
+  
+  .signup:hover {
+    background-color: #15803d;
+  }
+  
+  .signout {
+    background-color: #ef4444;
+    color: #fff;
+  }
+  
+  .signout:hover {
+    background-color: #dc2626;
+  }
+  
+  .menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #16A34A;
+  }
+  
+  /* Media Queries for Responsive Design */
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: block;
+      z-index: 101;
+    }
+    
+    .nav-container {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 70%;
+      height: 100vh;
+      background-color: #fff;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-top: 70px;
+      transition: right 0.3s ease;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+    
+    .nav-container.active {
+      right: 0;
+    }
+    
+    .nav-links {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .nav-links li {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .nav-buttons {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      width: 80%;
+    }
+    
+    .nav-buttons button {
+      margin: 5px 0;
+      width: 100%;
+    }
+  }
+  
+  /* For small mobile devices */
+  @media (max-width: 480px) {
+    .logo h1 {
+      font-size: 1.5rem;
+    }
+    
+    .nav-container {
+      width: 85%;
+    }
   }
   

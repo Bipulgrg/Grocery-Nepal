@@ -1,29 +1,30 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import './PopularCategories.css';
 
 const PopularCategories = () => {
+  const categories = [
+    { id: 1, name: "Quick Meals", icon: "fa-hamburger" },
+    { id: 2, name: "Vegetarian", icon: "fa-leaf" },
+    { id: 3, name: "Healthy", icon: "fa-carrot" },
+    { id: 4, name: "Desserts", icon: "fa-birthday-cake" },
+    { id: 5, name: "Drinks", icon: "fa-cocktail" }
+  ];
+
   return (
     <div className="popular-categories">
-      <div className="category">
-        <i className="fa fa-hamburger icon-green"></i>
-        <p>Quick Meals</p>
-      </div>
-      <div className="category">
-        <i className="fa fa-leaf icon-green"></i>
-        <p>Vegetarian</p>
-      </div>
-      <div className="category">
-        <i className="fa fa-carrot icon-green"></i>
-        <p>Healthy</p>
-      </div>
-      <div className="category">
-        <i className="fa fa-birthday-cake icon-green"></i>
-        <p>Desserts</p>
-      </div>
-      <div className="category">
-        <i className="fa fa-cocktail icon-green"></i>
-        <p>Drinks</p>
-      </div>
+      {categories.map(category => (
+        <Link 
+          to={`/recipes?category=${category.name}`} 
+          key={category.id} 
+          className="category-link"
+        >
+          <div className="category">
+            <i className={`fa ${category.icon} icon-green`}></i>
+            <p>{category.name}</p>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 };

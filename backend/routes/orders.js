@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const axios = require('axios');
 
 // Create a new order
 router.post('/', async (req, res) => {
@@ -64,5 +65,53 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Generic payment verification callback
+router.get('/payment-callback/:id', async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    if (status === 'success') {
+      // Update the order status
+      const order = await Order.findByIdAndUpdate(
+        req.params.id,
+        { status: 'confirmed' },
+        { new: true }
+      );
+      
+      return res.redirect(`/payment/success`);
+    } else {
+      return res.redirect(`/payment/failed`);
+    }
+  } catch (error) {
+    console.error('Payment callback error:', error);
+    return res.redirect('/payment/failed');
+  }
+});
+
+// Update order (for payment status)
+router.put('/:id', async (req, res) => {
+  try {
+    const { status, paymentDetails } = req.body;
+    
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status, 
+        paymentDetails: paymentDetails || {} 
+      },
+      { new: true }
+    );
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.json(order);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 
 module.exports = router; 

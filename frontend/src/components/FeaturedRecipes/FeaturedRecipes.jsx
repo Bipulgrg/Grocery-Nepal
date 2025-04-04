@@ -36,11 +36,12 @@ const FeaturedRecipes = () => {
         {recipes.map((recipe) => (
           <RecipeCard
             key={recipe._id}
+            recipeId={recipe._id}
             title={recipe.name}
             description={`${recipe.difficulty} difficulty, ${recipe.time} preparation time`}
             time={recipe.time.split(' ')[0]} // Extract number from time string
             image={recipe.image}
-            addButtonLabel="Add to Cart"
+            addButtonLabel="View Recipe"
           />
         ))}
       </div>

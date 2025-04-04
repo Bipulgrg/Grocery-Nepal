@@ -59,7 +59,7 @@ const Categories = () => {
             </div>
             <h3 className="category-name">{category.name}</h3>
             <p className="category-items">{category.items} items</p>
-            <Link to={`/recipes?category=${category.name.toLowerCase()}`} className="browse-category">
+            <Link to={`/recipes?category=${category.name}`} className="browse-category">
               Browse Category <span className="arrow">→</span>
             </Link>
           </div>

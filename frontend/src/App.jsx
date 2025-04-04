@@ -19,6 +19,9 @@ import AdminOrders from './pages/Admin/AdminOrders';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import ManageRecipes from './pages/Admin/ManageRecipes';
 import ManageIngredients from './pages/Admin/ManageIngredients';
+import PaymentSuccess from './pages/Payment/PaymentSuccess';
+import PaymentFailed from './pages/Payment/PaymentFailed';
+import PaymentComponent from './pages/Payment/payment';
 
 function App() {
   const location = useLocation();
@@ -39,6 +42,9 @@ function App() {
         <Route path="/purchase/:id" element={<Purchase />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admindashboard/*" element={<AdminDashboard />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/failed" element={<PaymentFailed />} />
+        <Route path="/payment" element={<PaymentComponent />} />
         <Route path="/" element={
           <>
             <Hero />

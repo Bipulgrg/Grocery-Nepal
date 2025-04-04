@@ -10,14 +10,14 @@ const Purchase = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedIngredients, setSelectedIngredients] = useState(new Set());
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showCodForm, setShowCodForm] = useState(false);
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [orderDetails, setOrderDetails] = useState({
     customerName: '',
     address: '',
     phoneNumber: ''
   });
   const [orderError, setOrderError] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
   useEffect(() => {
     fetchRecipe();
@@ -25,7 +25,6 @@ const Purchase = () => {
 
   useEffect(() => {
     if (recipe) {
-      // Initially select all ingredients
       const allIngredientIds = recipe.ingredients.map(item => item.ingredient._id);
       setSelectedIngredients(new Set(allIngredientIds));
     }
@@ -38,9 +37,7 @@ const Purchase = () => {
       const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Recipe not found');
-        }
+        if (response.status === 404) throw new Error('Recipe not found');
         throw new Error('Failed to fetch recipe');
       }
       
@@ -82,63 +79,52 @@ const Purchase = () => {
     }, 0);
   };
 
-  const handlePaymentMethod = (method) => {
-    if (method === 'cod') {
-      setShowPaymentModal(false);
-      setShowCodForm(true);
-    } else if (method === 'khalti') {
-      setShowCodForm(true);
-      alert('Redirecting to Khalti payment...');
-      setShowPaymentModal(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setOrderDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
     setOrderError(null);
 
+    // Validate form
+    if (!orderDetails.customerName || !orderDetails.address || !orderDetails.phoneNumber) {
+      setOrderError('Please fill in all fields');
+      return;
+    }
+
     try {
-      const selectedIngredientsList = recipe.ingredients.filter(item => 
-        selectedIngredients.has(item.ingredient._id)
-      ).map(item => ({
-        ingredient: item.ingredient._id,
-        quantity: item.quantity * quantity
-      }));
+      const selectedIngredientsList = recipe.ingredients
+        .filter(item => selectedIngredients.has(item.ingredient._id))
+        .map(item => ({
+          ingredient: item.ingredient._id,
+          quantity: item.quantity * quantity
+        }));
 
       const orderData = {
         ...orderDetails,
         recipe: recipe._id,
         ingredients: selectedIngredientsList,
-        totalAmount: total,
+        totalAmount: calculateSubtotal(),
         servings: quantity,
-        paymentMethod: 'cod'
+        paymentMethod: paymentMethod
       };
 
       const response = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create order');
-      }
+      if (!response.ok) throw new Error('Failed to create order');
 
-      const data = await response.json();
-      alert('Order placed successfully! Your order will be delivered within 24 hours.');
-      navigate('/recipes');
+      if (paymentMethod === 'cod') {
+        navigate('/payment/success');
+      } else {
+        // For online payment method
+        // In a real app, you would redirect to payment gateway here
+        // For now, we'll just simulate success
+        navigate('/payment/success');
+      }
     } catch (error) {
-      setOrderError(error.message);
+      console.error('Order error:', error);
+      setOrderError(error.message || 'Failed to process order');
     }
   };
 
@@ -285,46 +271,16 @@ const Purchase = () => {
         <button 
           className="checkout-button"
           disabled={selectedIngredients.size === 0}
-          onClick={() => setShowPaymentModal(true)}
+          onClick={() => setShowCheckoutForm(true)}
         >
           Proceed to Checkout
         </button>
       </div>
 
-      {showPaymentModal && (
+      {showCheckoutForm && (
         <div className="modal-overlay">
           <div className="payment-modal">
-            <h2>Select Payment Method</h2>
-            <div className="payment-options">
-              <button 
-                className="payment-option cod"
-                onClick={() => handlePaymentMethod('cod')}
-              >
-                <i className="fas fa-money-bill-wave"></i>
-                <span>Cash on Delivery</span>
-              </button>
-              <button 
-                className="payment-option khalti"
-                onClick={() => handlePaymentMethod('khalti')}
-              >
-                <i className="fas fa-wallet"></i>
-                <span>Pay with Khalti</span>
-              </button>
-            </div>
-            <button 
-              className="close-modal"
-              onClick={() => setShowPaymentModal(false)}
-            >
-              <i className="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showCodForm && (
-        <div className="modal-overlay">
-          <div className="payment-modal">
-            <h2>Delivery Details</h2>
+            <h2>Delivery Information</h2>
             <form onSubmit={handleOrderSubmit} className="cod-form">
               <div className="form-group">
                 <label htmlFor="customerName">Full Name</label>
@@ -333,7 +289,7 @@ const Purchase = () => {
                   id="customerName"
                   name="customerName"
                   value={orderDetails.customerName}
-                  onChange={handleInputChange}
+                  onChange={(e) => setOrderDetails({ ...orderDetails, customerName: e.target.value })}
                   required
                   placeholder="Enter your full name"
                 />
@@ -345,7 +301,7 @@ const Purchase = () => {
                   id="address"
                   name="address"
                   value={orderDetails.address}
-                  onChange={handleInputChange}
+                  onChange={(e) => setOrderDetails({ ...orderDetails, address: e.target.value })}
                   required
                   placeholder="Enter your complete delivery address"
                 />
@@ -358,10 +314,45 @@ const Purchase = () => {
                   id="phoneNumber"
                   name="phoneNumber"
                   value={orderDetails.phoneNumber}
-                  onChange={handleInputChange}
+                  onChange={(e) => setOrderDetails({ ...orderDetails, phoneNumber: e.target.value })}
                   required
                   placeholder="Enter your phone number"
                 />
+              </div>
+
+              <div className="payment-methods">
+                <h3>Payment Method</h3>
+                <div className="payment-options">
+                  <div className="payment-option">
+                    <input
+                      type="radio"
+                      id="cod"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                    />
+                    <label htmlFor="cod">
+                      <i className="fas fa-money-bill-wave"></i>
+                      Cash on Delivery
+                    </label>
+                  </div>
+                  
+                  <div className="payment-option">
+                    <input
+                      type="radio"
+                      id="online"
+                      name="paymentMethod"
+                      value="online"
+                      checked={paymentMethod === 'online'}
+                      onChange={() => setPaymentMethod('online')}
+                    />
+                    <label htmlFor="online">
+                      <i className="fas fa-credit-card"></i>
+                      Pay Online
+                    </label>
+                  </div>
+                </div>
               </div>
 
               {orderError && (
@@ -371,14 +362,24 @@ const Purchase = () => {
               )}
 
               <div className="form-actions">
-                <button type="button" className="cancel-button" onClick={() => setShowCodForm(false)}>
+                <button 
+                  type="button" 
+                  className="cancel-button" 
+                  onClick={() => setShowCheckoutForm(false)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="confirm-button">
-                  Confirm Order
+                  {paymentMethod === 'cod' ? 'Place Order' : 'Proceed to Payment'}
                 </button>
               </div>
             </form>
+            <button 
+              className="close-modal"
+              onClick={() => setShowCheckoutForm(false)}
+            >
+              <i className="fas fa-times"></i>
+            </button>
           </div>
         </div>
       )}

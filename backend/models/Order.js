@@ -35,7 +35,7 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'out_for_delivery', 'delivered'],
+    enum: ['pending', 'paid', 'out_for_delivery', 'delivered', 'failed'],
     default: 'pending'
   },
   servings: {
@@ -44,8 +44,13 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['cod', 'khalti'],
-    required: true
+    required: true,
+    enum: ['cod', 'online'],
+    default: 'cod'
+  },
+  paymentDetails: {
+    type: Object,
+    default: {}
   },
   createdAt: {
     type: Date,

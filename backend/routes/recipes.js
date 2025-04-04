@@ -6,10 +6,14 @@ const { upload } = require('../config/cloudinary');
 // Search recipes (move this before the :id route)
 router.get('/search', async (req, res) => {
   try {
-    const { query } = req.query;
-    const recipes = await Recipe.find({
-      name: { $regex: query, $options: 'i' }
-    }).populate('ingredients.ingredient');
+    const { query, category } = req.query;
+    let filter = { name: { $regex: query, $options: 'i' } };
+    
+    if (category) {
+      filter.category = { $regex: "^" + category + "$", $options: 'i' };
+    }
+    
+    const recipes = await Recipe.find(filter).populate('ingredients.ingredient');
     res.json(recipes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,12 +29,12 @@ router.get('/', async (req, res) => {
     if (query && category) {
       filter = {
         name: { $regex: query, $options: 'i' },
-        category: category
+        category: { $regex: "^" + category + "$", $options: 'i' }
       };
     } else if (query) {
       filter = { name: { $regex: query, $options: 'i' } };
     } else if (category) {
-      filter = { category: category };
+      filter = { category: { $regex: "^" + category + "$", $options: 'i' } };
     }
 
     const recipes = await Recipe.find(filter).populate('ingredients.ingredient');

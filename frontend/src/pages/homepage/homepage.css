@@ -1,5 +1,52 @@
 .homepage {
-    padding: 10px;
+    padding: 20px;
     text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
   }
+  
+.homepage h1 {
+  font-size: 2rem;
+  margin: 30px 0;
+  color: #1f2937;
+}
+
+.featureRecipe {
+  margin: 60px 0;
+}
+
+.featureRecipe h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #1f2937;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .homepage {
+    padding: 15px;
+  }
+  
+  .homepage h1,
+  .featureRecipe h2 {
+    font-size: 1.8rem;
+    margin: 20px 0;
+  }
+  
+  .featureRecipe {
+    margin: 40px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .homepage h1,
+  .featureRecipe h2 {
+    font-size: 1.5rem;
+    margin: 15px 0;
+  }
+  
+  .featureRecipe {
+    margin: 30px 0;
+  }
+}
   

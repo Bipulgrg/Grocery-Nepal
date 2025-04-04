@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
 dotenv.config();
 const app = express();
 
@@ -29,6 +28,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/recipes', require('./routes/recipes'));
 app.use('/api/ingredients', require('./routes/ingredients'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/payment', require('./routes/transactionRoute'));
+
+// Esewa payment routes
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

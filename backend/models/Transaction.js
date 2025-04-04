@@ -1,8 +1,9 @@
-
-
 const mongoose = require('mongoose');
+
+// Define the Transaction schema
 const transactionSchema = new mongoose.Schema(
-  {product_id: {
+  {
+    product_id: {
       type: String, 
       required: true,
     },
@@ -14,7 +15,7 @@ const transactionSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["PENDING", "COMPLETE", "FAILED", "REFUNDED"], // Example statuses
+      enum: ["PENDING", "COMPLETE", "FAILED", "REFUNDED"],
       default: "PENDING",
     },
   },
@@ -22,6 +23,8 @@ const transactionSchema = new mongoose.Schema(
     timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
 );
+
 // Create the Transaction model from the schema
- const Transaction = mongoose.model("Transaction", transactionSchema);
-module.exports = {Transaction};
+const Transaction = mongoose.model("Transaction", transactionSchema);
+
+module.exports = Transaction; 

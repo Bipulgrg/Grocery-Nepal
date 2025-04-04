@@ -18,6 +18,7 @@ const Purchase = () => {
   });
   const [orderError, setOrderError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     fetchRecipe();
@@ -79,6 +80,39 @@ const Purchase = () => {
     }, 0);
   };
 
+  // Function to initiate eSewa payment
+  const initiateEsewaPayment = async (orderId) => {
+    try {
+      setProcessingPayment(true);
+      setOrderError(null);
+
+      // Call the backend to initiate payment
+      const response = await fetch('http://localhost:5000/initiate-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: calculateSubtotal(),
+          productId: orderId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to initiate payment');
+      }
+
+      // Redirect to eSewa payment page
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      setOrderError(error.message || 'Failed to initiate payment');
+      setProcessingPayment(false);
+    }
+  };
+
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
     setOrderError(null);
@@ -106,21 +140,28 @@ const Purchase = () => {
         paymentMethod: paymentMethod
       };
 
-      const response = await fetch('http://localhost:5000/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
-
-      if (!response.ok) throw new Error('Failed to create order');
-
+      // For Cash on Delivery, create the order directly
       if (paymentMethod === 'cod') {
+        const response = await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) throw new Error('Failed to create order');
+
         navigate('/payment/success');
-      } else {
-        // For online payment method
-        // In a real app, you would redirect to payment gateway here
-        // For now, we'll just simulate success
-        navigate('/payment/success');
+      }
+      // For eSewa payment
+      else if (paymentMethod === 'esewa') {
+        // Store the order details in localStorage for later use
+        localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+        
+        // Generate a unique order ID
+        const orderId = `ORDER-${Date.now()}`;
+        
+        // Initiate eSewa payment
+        await initiateEsewaPayment(orderId);
       }
     } catch (error) {
       console.error('Order error:', error);
@@ -341,15 +382,15 @@ const Purchase = () => {
                   <div className="payment-option">
                     <input
                       type="radio"
-                      id="online"
+                      id="esewa"
                       name="paymentMethod"
-                      value="online"
-                      checked={paymentMethod === 'online'}
-                      onChange={() => setPaymentMethod('online')}
+                      value="esewa"
+                      checked={paymentMethod === 'esewa'}
+                      onChange={() => setPaymentMethod('esewa')}
                     />
-                    <label htmlFor="online">
-                      <i className="fas fa-credit-card"></i>
-                      Pay Online
+                    <label htmlFor="esewa">
+                      <i className="fas fa-wallet"></i>
+                      Pay with eSewa
                     </label>
                   </div>
                 </div>
@@ -369,8 +410,16 @@ const Purchase = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="confirm-button">
-                  {paymentMethod === 'cod' ? 'Place Order' : 'Proceed to Payment'}
+                <button 
+                  type="submit" 
+                  className="confirm-button"
+                  disabled={processingPayment}
+                >
+                  {processingPayment 
+                    ? 'Processing...' 
+                    : paymentMethod === 'cod' 
+                      ? 'Place Order' 
+                      : 'Proceed to Payment'}
                 </button>
               </div>
             </form>

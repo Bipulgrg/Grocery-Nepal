@@ -1,34 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import './PaymentSuccess.css';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [orderData, setOrderData] = useState(null);
+  const [orderSaved, setOrderSaved] = useState(false);
 
   // Get parameters from eSewa callback
   const pid = searchParams.get('pid'); // Product ID
   const amt = searchParams.get('amt'); // Amount
   const refId = searchParams.get('refId'); // Reference ID
+  const oid = searchParams.get('oid'); // Order ID (optional)
 
   useEffect(() => {
-    // If this is a return from eSewa with callback parameters,
-    // handle the payment status update
-    if (pid && amt && refId) {
-      handleEsewaCallback();
-    }
+    const checkAndProcessOrder = async () => {
+      try {
+        // Check if there's a pending order to process
+        const pendingOrder = localStorage.getItem('pendingOrder');
+        
+        if (pendingOrder) {
+          setOrderData(JSON.parse(pendingOrder));
+          
+          // If this is a return from eSewa with callback parameters,
+          // handle the payment status update and create the order
+          if (pid && amt && refId) {
+            await handleEsewaCallback(JSON.parse(pendingOrder));
+          }
+        } else if (pid && amt && refId) {
+          // If we have eSewa parameters but no pending order in localStorage,
+          // try to verify the payment anyway
+          await handleEsewaCallback(null);
+        }
+      } catch (error) {
+        console.error('Error processing order:', error);
+        setError(error.message || 'Failed to process order');
+      }
+    };
     
-    // Check if there's a pending order to process
-    const pendingOrder = localStorage.getItem('pendingOrder');
-    if (pendingOrder) {
-      setOrderData(JSON.parse(pendingOrder));
-    }
-  }, [pid, amt, refId]);
+    checkAndProcessOrder();
+  }, [pid, amt, refId, oid]);
 
-  const handleEsewaCallback = async () => {
+  const handleEsewaCallback = async (orderDetails) => {
     try {
       setLoading(true);
       
@@ -50,37 +67,63 @@ const PaymentSuccess = () => {
         throw new Error(data.message || 'Failed to verify payment');
       }
 
-      // Process the pending order if exists
-      const pendingOrder = localStorage.getItem('pendingOrder');
-      if (pendingOrder) {
-        const orderData = JSON.parse(pendingOrder);
-        
-        // Create the order in the database
+      // Create the order in the database if we have order details
+      if (orderDetails) {
         const orderResponse = await fetch('http://localhost:5000/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...orderData,
+            ...orderDetails,
             paymentMethod: 'esewa',
+            paymentStatus: 'paid',
             paymentDetails: {
               refId,
+              pid,
               amount: amt,
+              transactionId: refId,
+              paymentDate: new Date().toISOString(),
               status: 'COMPLETE'
             }
           })
         });
 
         if (!orderResponse.ok) {
-          throw new Error('Failed to create order after payment');
+          const errorData = await orderResponse.json();
+          throw new Error(errorData.message || 'Failed to create order after payment');
         }
 
+        const savedOrder = await orderResponse.json();
+        console.log('Order saved successfully:', savedOrder);
+        
         // Clear the pending order from localStorage
         localStorage.removeItem('pendingOrder');
-        setOrderData(orderData);
+        setOrderSaved(true);
       }
     } catch (error) {
       console.error('Payment verification error:', error);
       setError(error.message || 'Failed to verify payment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const retryOrderCreation = async () => {
+    if (!orderData) {
+      setError('No order data available to retry');
+      return;
+    }
+    
+    if (!pid || !amt || !refId) {
+      setError('Missing payment information');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await handleEsewaCallback(orderData);
+    } catch (error) {
+      console.error('Retry failed:', error);
+      setError(error.message || 'Failed to retry order creation');
     } finally {
       setLoading(false);
     }
@@ -91,8 +134,8 @@ const PaymentSuccess = () => {
       <div className="payment-result-container success">
         <div className="payment-result-card">
           <div className="loading-spinner"></div>
-          <h1>Processing Payment</h1>
-          <p>Please wait while we verify your payment...</p>
+          <h1>Processing Your Order</h1>
+          <p>Please wait while we complete your order...</p>
         </div>
       </div>
     );
@@ -105,13 +148,18 @@ const PaymentSuccess = () => {
           <div className="icon-container error">
             <FaCheckCircle className="result-icon" />
           </div>
-          <h1>Payment Verification Failed</h1>
+          <h1>Order Processing Failed</h1>
           <p>{error}</p>
-          <p>Your payment was received, but we had trouble updating your order.</p>
-          <p>Please contact customer support for assistance.</p>
-          <Link to="/recipes" className="action-button error">
-            Back to Recipes
-          </Link>
+          <p>Your payment was successful, but we had trouble creating your order.</p>
+          
+          <div className="action-buttons">
+            <button onClick={retryOrderCreation} className="action-button retry">
+              Retry Order Creation
+            </button>
+            <Link to="/recipes" className="action-button back">
+              Back to Recipes
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -132,11 +180,14 @@ const PaymentSuccess = () => {
             <p>Customer: {orderData.customerName}</p>
             <p>Delivery Address: {orderData.address}</p>
             <p>Phone: {orderData.phoneNumber}</p>
-            <p>Amount: Rs. {orderData.totalAmount.toFixed(2)}</p>
+            <p>Amount: Rs. {orderData.totalAmount?.toFixed(2)}</p>
+            <p><strong>Payment Method:</strong> eSewa</p>
+            {refId && <p><strong>Transaction ID:</strong> {refId}</p>}
+            <p><strong>Order Status:</strong> {orderSaved ? 'Confirmed' : 'Processing'}</p>
           </div>
         )}
         <Link to="/recipes" className="action-button success">
-          Back to Recipes
+          Continue Shopping
         </Link>
       </div>
     </div>

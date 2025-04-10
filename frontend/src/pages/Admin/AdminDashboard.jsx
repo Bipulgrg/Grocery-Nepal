@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Admin from './Admin';
 import AdminIngredients from './AdminIngredients';
 import AdminOrders from './AdminOrders';
@@ -10,10 +11,81 @@ import './AdminDashboard.css';
 const AdminDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [orderStats, setOrderStats] = useState([]);
+  const [categoryStats, setCategoryStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch order statistics
+        const orderResponse = await fetch('http://localhost:5000/api/dashboard/orders/stats');
+        if (!orderResponse.ok) throw new Error('Failed to fetch order statistics');
+        const orderData = await orderResponse.json();
+        setOrderStats(orderData);
+
+        // Fetch category statistics
+        const categoryResponse = await fetch('http://localhost:5000/api/dashboard/recipes/category-stats');
+        if (!categoryResponse.ok) throw new Error('Failed to fetch category statistics');
+        const categoryData = await categoryResponse.json();
+        setCategoryStats(categoryData);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   const isActiveRoute = (path) => {
     return location.pathname === path;
   };
+
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className="admin-sidebar">
+          {/* Sidebar content */}
+        </div>
+        <div className="admin-main">
+          <div className="admin-content">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading dashboard data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="admin-dashboard">
+        <div className="admin-sidebar">
+          {/* Sidebar content */}
+        </div>
+        <div className="admin-main">
+          <div className="admin-content">
+            <div className="error-container">
+              <h2>Error Loading Dashboard</h2>
+              <p>{error}</p>
+              <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
@@ -23,6 +95,13 @@ const AdminDashboard = () => {
         </div>
         <nav className="admin-nav">
           <div className="nav-section">
+              <Link 
+              to="/admindashboard" 
+              className={`nav-item ${isActiveRoute('/admindashboard') ? 'active' : ''}`}
+              >
+              <i className="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+             </Link>
             <div className="nav-section-title">Add New</div>
             <Link 
               to="/admindashboard/recipes/add" 
@@ -90,6 +169,55 @@ const AdminDashboard = () => {
               <div className="admin-welcome">
                 <h1>Welcome to Admin Dashboard</h1>
                 <p>Select an option from the sidebar to manage your content.</p>
+                
+                <div className="dashboard-charts">
+                  <div className="chart-container">
+                    <h2>Monthly Orders</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        data={orderStats}
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="orders" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div className="chart-container">
+                    <h2>Recipes by Category</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={categoryStats}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {categoryStats.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`${value} recipes`, 'Count']} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
                 <div className="quick-stats">
                   <div className="stat-card">
                     <i className="fas fa-utensils"></i>

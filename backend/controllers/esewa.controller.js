@@ -1,4 +1,5 @@
 const Transaction = require('../models/Transaction');
+const Order = require('../models/Order');
 
 /**
  * Initiates an eSewa payment
@@ -6,7 +7,7 @@ const Transaction = require('../models/Transaction');
  * @param {Object} res - Express response object
  */
 const EsewaInitiatePayment = async (req, res) => {
-  const { amount, productId } = req.body;
+  const { amount, productId, orderDetails } = req.body;
 
   try {
     // ✅ Use dynamic import() for ES modules
@@ -26,14 +27,29 @@ const EsewaInitiatePayment = async (req, res) => {
     }
 
     if (reqPayment.status === 200) {
+      // Save transaction record
       const transaction = new Transaction({
         product_id: productId,
         amount: parseFloat(amount),
         status: "PENDING"
       });
-
       await transaction.save();
-      console.log("Transaction created:", transaction);
+
+      // Save order record
+      if (orderDetails) {
+        const order = new Order({
+          ...orderDetails,
+          paymentMethod: 'esewa',
+          status: 'pending',
+          paymentDetails: {
+            transactionId: productId,
+            paymentStatus: 'pending',
+            paymentDate: new Date(),
+            paymentMethod: 'esewa'
+          }
+        });
+        await order.save();
+      }
 
       return res.status(200).json({
         success: true,
@@ -55,9 +71,10 @@ const EsewaInitiatePayment = async (req, res) => {
  * @param {Object} res - Express response object
  */
 const paymentStatus = async (req, res) => {
-  const { product_id } = req.body;
+  const { product_id, status } = req.body;
 
   try {
+    // Update transaction status
     const transaction = await Transaction.findOne({ product_id });
     if (!transaction) {
       return res.status(400).json({ success: false, message: "Transaction not found" });
@@ -74,8 +91,18 @@ const paymentStatus = async (req, res) => {
     );
 
     if (paymentStatusCheck.status === 200) {
+      // Update transaction status
       transaction.status = paymentStatusCheck.data.status || "COMPLETE";
       await transaction.save();
+
+      // Update order status
+      const order = await Order.findOne({ 'paymentDetails.transactionId': product_id });
+      if (order) {
+        order.status = status === 'success' ? 'paid' : 'failed';
+        order.paymentDetails.paymentStatus = status;
+        order.paymentDetails.paymentDate = new Date();
+        await order.save();
+      }
 
       return res.status(200).json({
         success: true,

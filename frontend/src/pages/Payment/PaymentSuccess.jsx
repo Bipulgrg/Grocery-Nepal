@@ -18,6 +18,13 @@ const PaymentSuccess = () => {
   const oid = searchParams.get('oid'); // Order ID (optional)
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+
     const checkAndProcessOrder = async () => {
       try {
         // Check if there's a pending order to process
@@ -43,17 +50,24 @@ const PaymentSuccess = () => {
     };
     
     checkAndProcessOrder();
-  }, [pid, amt, refId, oid]);
+  }, [pid, amt, refId, oid, navigate]);
 
   const handleEsewaCallback = async (orderDetails) => {
     try {
       setLoading(true);
       
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/signin');
+        return;
+      }
+
       // Call the backend to verify payment status
       const response = await fetch('http://localhost:5000/payment-status', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           product_id: pid,
@@ -71,7 +85,10 @@ const PaymentSuccess = () => {
       if (orderDetails) {
         const orderResponse = await fetch('http://localhost:5000/api/orders', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
             ...orderDetails,
             paymentMethod: 'esewa',

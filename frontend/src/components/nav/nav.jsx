@@ -37,6 +37,9 @@ const Nav = () => {
           <li><Link to="/recipes" onClick={() => setMenuOpen(false)}>Recipes</Link></li>
           <li><Link to="/categories" onClick={() => setMenuOpen(false)}>Categories</Link></li>
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>About</Link></li>
+          {isLoggedIn && (
+            <li><Link to="/orders" onClick={() => setMenuOpen(false)}>Orders</Link></li>
+          )}
         </ul>
         <div className="nav-buttons">
           {!isLoggedIn ? (

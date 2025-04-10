@@ -4,6 +4,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const { EsewaInitiatePayment, paymentStatus } = require('./controllers/esewa.controller');
+const recipeRoutes = require('./routes/recipes');
+const ingredientRoutes = require('./routes/ingredients');
+const orderRoutes = require('./routes/orders');
+const dashboardRoutes = require('./routes/dashboard');
 
 dotenv.config();
 const app = express();
@@ -34,9 +38,10 @@ connectDB();
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/recipes', require('./routes/recipes'));
-app.use('/api/ingredients', require('./routes/ingredients'));
-app.use('/api/orders', require('./routes/orders'));
+app.use('/api/recipes', recipeRoutes);
+app.use('/api/ingredients', ingredientRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 // app.use('/api/payment', require('./routes/transactionRoute'));
 
 // Esewa payment routes

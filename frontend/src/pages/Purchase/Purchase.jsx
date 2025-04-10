@@ -2,6 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './Purchase.css';
 
+// Utility function to decode JWT token
+const decodeJWT = (token) => {
+  try {
+    if (!token) {
+      console.error('No token provided');
+      return null;
+    }
+
+    // Split the token into its parts
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Invalid token format');
+      return null;
+    }
+
+    // Decode the payload
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const decoded = JSON.parse(jsonPayload);
+    console.log('Decoded token:', decoded); // Debug log
+
+    // Check for different possible user ID fields
+    if (decoded.userId) return decoded;
+    if (decoded.id) return decoded;
+    if (decoded._id) return decoded;
+    
+    console.error('No user ID found in token');
+    return null;
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
 const Purchase = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,8 +59,15 @@ const Purchase = () => {
   const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/signin', { state: { from: `/purchase/${id}` } });
+      return;
+    }
+
     fetchRecipe();
-  }, [id]);
+  }, [id, navigate]);
 
   useEffect(() => {
     if (recipe) {
@@ -80,50 +125,39 @@ const Purchase = () => {
     }, 0);
   };
 
-  // Function to initiate eSewa payment
-  const initiateEsewaPayment = async (orderId) => {
-    try {
-      setProcessingPayment(true);
-      setOrderError(null);
-
-      // Call the backend to initiate payment
-      const response = await fetch('http://localhost:5000/initiate-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: calculateSubtotal(),
-          productId: orderId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to initiate payment');
-      }
-
-      // Redirect to eSewa payment page
-      window.location.href = data.url;
-    } catch (error) {
-      console.error('Payment initiation error:', error);
-      setOrderError(error.message || 'Failed to initiate payment');
-      setProcessingPayment(false);
-    }
-  };
-
-  const handleOrderSubmit = async (e) => {
+  const handleEsewaPayment = async (e) => {
     e.preventDefault();
     setOrderError(null);
-
-    // Validate form
-    if (!orderDetails.customerName || !orderDetails.address || !orderDetails.phoneNumber) {
-      setOrderError('Please fill in all fields');
-      return;
-    }
-
+    
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/signin', { state: { from: `/purchase/${id}` } });
+        return;
+      }
+
+      // Decode JWT to get userId
+      const decodedToken = decodeJWT(token);
+      console.log('Token from localStorage:', token); // Debug log
+      console.log('Decoded token in handleEsewaPayment:', decodedToken); // Debug log
+
+      if (!decodedToken) {
+        throw new Error('Invalid authentication token');
+      }
+
+      // Get userId from any of the possible fields
+      const userId = decodedToken.userId || decodedToken.id || decodedToken._id;
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
+
+      // Validate form
+      if (!orderDetails.customerName || !orderDetails.address || !orderDetails.phoneNumber) {
+        setOrderError('Please fill in all fields');
+        return;
+      }
+
+      // Create order data
       const selectedIngredientsList = recipe.ingredients
         .filter(item => selectedIngredients.has(item.ingredient._id))
         .map(item => ({
@@ -132,36 +166,134 @@ const Purchase = () => {
         }));
 
       const orderData = {
-        ...orderDetails,
+        customerName: orderDetails.customerName,
+        address: orderDetails.address,
+        phoneNumber: orderDetails.phoneNumber,
+        userId: userId, // Use the extracted userId
         recipe: recipe._id,
         ingredients: selectedIngredientsList,
         totalAmount: calculateSubtotal(),
         servings: quantity,
-        paymentMethod: paymentMethod
+        paymentMethod: 'esewa',
+        status: 'pending'
       };
 
-      // For Cash on Delivery, create the order directly
+      // Save order details to localStorage
+      localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+      // Generate a unique order ID
+      const orderId = `ORDER-${Date.now()}`;
+
+      // Initiate eSewa payment
+      const response = await fetch('http://localhost:5000/initiate-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: calculateSubtotal(),
+          productId: orderId,
+          orderDetails: orderData
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.url) {
+        // Redirect to eSewa payment page
+        window.location.href = data.url;
+      } else {
+        setOrderError('Failed to initiate payment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      setOrderError('An error occurred while processing your payment. Please try again.');
+    }
+  };
+
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+    setOrderError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/signin', { state: { from: `/purchase/${id}` } });
+        return;
+      }
+
+      // Decode JWT to get userId
+      const decodedToken = decodeJWT(token);
+      console.log('Token from localStorage:', token);
+      console.log('Decoded token in handleOrderSubmit:', decodedToken);
+
+      if (!decodedToken) {
+        throw new Error('Invalid authentication token');
+      }
+
+      // Get userId from the decoded token
+      const userId = decodedToken.userId;
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
+
+      // Validate form
+      if (!orderDetails.customerName || !orderDetails.address || !orderDetails.phoneNumber) {
+        setOrderError('Please fill in all fields');
+        return;
+      }
+
+      const selectedIngredientsList = recipe.ingredients
+        .filter(item => selectedIngredients.has(item.ingredient._id))
+        .map(item => ({
+          ingredient: item.ingredient._id,
+          quantity: item.quantity * quantity
+        }));
+
+      // For Cash on Delivery
       if (paymentMethod === 'cod') {
+        const orderData = {
+          customerName: orderDetails.customerName,
+          address: orderDetails.address,
+          phoneNumber: orderDetails.phoneNumber,
+          userId: userId, // Include userId from decoded token
+          recipe: recipe._id,
+          ingredients: selectedIngredientsList,
+          totalAmount: calculateSubtotal(),
+          servings: quantity,
+          paymentMethod: 'cod',
+          status: 'pending',
+          paymentDetails: {
+            paymentMethod: 'cod',
+            paymentStatus: 'pending',
+            paymentDate: new Date().toISOString()
+          }
+        };
+
+        console.log('Sending COD order data:', orderData); // Debug log
+
         const response = await fetch('http://localhost:5000/api/orders', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(orderData)
         });
 
-        if (!response.ok) throw new Error('Failed to create order');
+        const responseData = await response.json();
+        console.log('Server response:', responseData); // Debug log
+
+        if (!response.ok) {
+          throw new Error(responseData.message || 'Failed to create order');
+        }
 
         navigate('/payment/success');
       }
       // For eSewa payment
       else if (paymentMethod === 'esewa') {
-        // Store the order details in localStorage for later use
-        localStorage.setItem('pendingOrder', JSON.stringify(orderData));
-        
-        // Generate a unique order ID
-        const orderId = `ORDER-${Date.now()}`;
-        
-        // Initiate eSewa payment
-        await initiateEsewaPayment(orderId);
+        await handleEsewaPayment(e);
       }
     } catch (error) {
       console.error('Order error:', error);

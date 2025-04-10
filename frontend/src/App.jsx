@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom'; 
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import Nav from './components/nav/nav'
 import Footer from './components/footer/footer'
 import SignIn from './pages/sigin/signin'
@@ -22,6 +20,7 @@ import ManageIngredients from './pages/Admin/ManageIngredients';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import PaymentFailed from './pages/Payment/PaymentFailed';
 import PaymentComponent from './pages/Payment/payment';
+import MyOrders from './pages/Orders/MyOrders';
 
 function App() {
   const location = useLocation();
@@ -45,6 +44,7 @@ function App() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
         <Route path="/payment" element={<PaymentComponent />} />
+        <Route path="/orders" element={<MyOrders />} />
         <Route path="/" element={
           <>
             <Hero />

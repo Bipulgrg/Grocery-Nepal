@@ -618,7 +618,7 @@
 .checkout-button {
   width: 100%;
   padding: 1rem;
-  background-color: #4f46e5;
+  background-color: #16A34A;
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -630,7 +630,7 @@
 }
 
 .checkout-button:hover {
-  background-color: #4338ca;
+  background-color: #15803d;
 }
 
 .checkout-button:disabled {

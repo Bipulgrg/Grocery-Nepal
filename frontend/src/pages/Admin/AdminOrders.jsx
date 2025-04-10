@@ -12,13 +12,26 @@ const AdminOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/orders');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('http://localhost:5000/api/orders/my-orders', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch orders');
       }
+
       const data = await response.json();
+      console.log('Fetched orders:', data); // Debug log
       setOrders(data);
     } catch (error) {
+      console.error('Error fetching orders:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -27,10 +40,12 @@ const AdminOrders = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ status: newStatus })
       });
@@ -51,9 +66,24 @@ const AdminOrders = () => {
       case 'pending':
         return '#FCD34D';
       case 'out_for_delivery':
-        return '#60A5FA';
+        return '#F59E0B';
       case 'delivered':
         return '#34D399';
+      case 'failed':
+        return '#EF4444';
+      default:
+        return '#9CA3AF';
+    }
+  };
+
+  const getPaymentMethodColor = (method) => {
+    switch (method) {
+      case 'cod':
+        return '#6B7280';
+      case 'esewa':
+        return '#3B82F6';
+      case 'online':
+        return '#10B981';
       default:
         return '#9CA3AF';
     }
@@ -71,20 +101,29 @@ const AdminOrders = () => {
     return <div className="error">Error: {error}</div>;
   }
 
+  if (!orders || orders.length === 0) {
+    return <div className="no-orders">No orders found</div>;
+  }
+
   return (
     <div className="admin-orders">
-      <h1>Manage Orders</h1>
-      
-      <div className="orders-grid">
-        {orders.map(order => (
+      <h2>My Orders</h2>
+      <div className="orders-list">
+        {orders.map((order) => (
           <div key={order._id} className="order-card">
             <div className="order-header">
-              <h3>Order #{order._id.slice(-6)}</h3>
+              <span className="order-id">Order #{order._id}</span>
               <span 
-                className="status-badge"
+                className="order-status"
                 style={{ backgroundColor: getStatusColor(order.status) }}
               >
-                {order.status.replace('_', ' ')}
+                {order.status}
+              </span>
+              <span 
+                className="payment-method"
+                style={{ backgroundColor: getPaymentMethodColor(order.paymentMethod) }}
+              >
+                {order.paymentMethod}
               </span>
             </div>
 
@@ -117,6 +156,12 @@ const AdminOrders = () => {
                 <span className="label">Ordered:</span>
                 <span>{formatDate(order.createdAt)}</span>
               </div>
+              {order.paymentDetails && (
+                <div className="detail-row">
+                  <span className="label">Transaction ID:</span>
+                  <span>{order.paymentDetails.transactionId || 'N/A'}</span>
+                </div>
+              )}
             </div>
 
             <div className="ingredients-list">
@@ -127,18 +172,6 @@ const AdminOrders = () => {
                   <span>{item.quantity} {item.ingredient.unit}</span>
                 </div>
               ))}
-            </div>
-
-            <div className="status-actions">
-              <select
-                value={order.status}
-                onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                className="status-select"
-              >
-                <option value="pending">Pending</option>
-                <option value="out_for_delivery">Out for Delivery</option>
-                <option value="delivered">Delivered</option>
-              </select>
             </div>
           </div>
         ))}

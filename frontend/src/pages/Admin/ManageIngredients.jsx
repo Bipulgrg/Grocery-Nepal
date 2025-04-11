@@ -175,7 +175,7 @@ const ManageIngredients = () => {
               <div className="ingredient-info">
                 <h3>{ingredient.name}</h3>
                 <div className="ingredient-meta">
-                  <span><i className="fas fa-tag"></i> £{ingredient.price.toFixed(2)} per {ingredient.unit}</span>
+                  <span><i className="fas fa-tag"></i> Rs.{ingredient.price.toFixed(2)} per {ingredient.unit}</span>
                   <span><i className="fas fa-box"></i> {ingredient.stock} {ingredient.stockUnit}</span>
                 </div>
                 <div className="ingredient-actions">

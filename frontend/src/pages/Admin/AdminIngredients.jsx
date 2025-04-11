@@ -175,7 +175,7 @@ const AdminIngredients = () => {
                 <div className="detail-row">
                   <span className="detail-label">Price:</span>
                   <span className="detail-value">
-                    ${Number(ingredient.price).toFixed(2)}/{ingredient.unit}
+                    Rs.{Number(ingredient.price).toFixed(2)}/{ingredient.unit}
                   </span>
                 </div>
                 <div className="detail-row">

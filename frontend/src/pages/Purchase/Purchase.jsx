@@ -57,15 +57,19 @@ const Purchase = () => {
   const [orderError, setOrderError] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is logged in and get role
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    
     if (!token) {
       navigate('/signin', { state: { from: `/purchase/${id}` } });
       return;
     }
 
+    setUserRole(user?.role);
     fetchRecipe();
   }, [id, navigate]);
 
@@ -301,6 +305,14 @@ const Purchase = () => {
     }
   };
 
+  const handleCheckoutClick = () => {
+    if (userRole === 'admin') {
+      setOrderError('Admin users are not allowed to make purchases. Please use a regular user account.');
+      return;
+    }
+    setShowCheckoutForm(true);
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -383,10 +395,6 @@ const Purchase = () => {
             ))}
           </div>
         </div>
-
-        <button className="share-recipe">
-          <i className="fas fa-share"></i>
-        </button>
       </div>
 
       <div className="shopping-cart">
@@ -441,10 +449,16 @@ const Purchase = () => {
           </div>
         </div>
 
+        {orderError && (
+          <div className="error-message">
+            {orderError}
+          </div>
+        )}
+
         <button 
           className="checkout-button"
           disabled={selectedIngredients.size === 0}
-          onClick={() => setShowCheckoutForm(true)}
+          onClick={handleCheckoutClick}
         >
           Proceed to Checkout
         </button>
@@ -527,12 +541,6 @@ const Purchase = () => {
                   </div>
                 </div>
               </div>
-
-              {orderError && (
-                <div className="error-message">
-                  {orderError}
-                </div>
-              )}
 
               <div className="form-actions">
                 <button 

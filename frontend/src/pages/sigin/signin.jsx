@@ -18,6 +18,7 @@ const SignIn = () => {
       const response = await login(formData);
       alert(response.message);
       localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
       window.location.href = "/";
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid Credentials');

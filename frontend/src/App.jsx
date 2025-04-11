@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom'; 
 import Nav from './components/nav/nav'
 import Footer from './components/footer/footer'
@@ -21,10 +21,12 @@ import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import PaymentFailed from './pages/Payment/PaymentFailed';
 import PaymentComponent from './pages/Payment/payment';
 import MyOrders from './pages/Orders/MyOrders';
+import ProtectedRoute from './components/ProtectedRoute';
+import About from './pages/About/About';
 
 function App() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admindashboard');
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/admindashboard');
 
   return (
     <>
@@ -35,16 +37,73 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/recipes" element={<RecipeList />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/ingredients" element={<AdminIngredients />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/purchase/:id" element={<Purchase />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
-        <Route path="/admindashboard/*" element={<AdminDashboard />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/failed" element={<PaymentFailed />} />
         <Route path="/payment" element={<PaymentComponent />} />
-        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/about" element={<About />} />
+        
+        {/* Protected Admin Routes */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <Admin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/ingredients" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminIngredients />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/orders" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminOrders />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admindashboard/*" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/recipes/manage" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <ManageRecipes />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/ingredients/manage" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <ManageIngredients />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Protected User Routes */}
+        <Route 
+          path="/orders" 
+          element={
+            <ProtectedRoute>
+              <MyOrders />
+            </ProtectedRoute>
+          } 
+        />
+        
         <Route path="/" element={
           <>
             <Hero />

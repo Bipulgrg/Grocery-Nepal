@@ -17,7 +17,7 @@ const AdminOrders = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/orders/my-orders', {
+      const response = await fetch('http://localhost:5000/api/orders/admin', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -28,7 +28,6 @@ const AdminOrders = () => {
       }
 
       const data = await response.json();
-      console.log('Fetched orders:', data); // Debug log
       setOrders(data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -107,18 +106,25 @@ const AdminOrders = () => {
 
   return (
     <div className="admin-orders">
-      <h2>My Orders</h2>
+      <h2>All Orders</h2>
       <div className="orders-list">
         {orders.map((order) => (
           <div key={order._id} className="order-card">
             <div className="order-header">
               <span className="order-id">Order #{order._id}</span>
-              <span 
-                className="order-status"
-                style={{ backgroundColor: getStatusColor(order.status) }}
-              >
-                {order.status}
-              </span>
+              <div className="status-container">
+                <select
+                  value={order.status}
+                  onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                  className="status-select"
+                  style={{ backgroundColor: getStatusColor(order.status) }}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="out_for_delivery">Out for Delivery</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
               <span 
                 className="payment-method"
                 style={{ backgroundColor: getPaymentMethodColor(order.paymentMethod) }}
@@ -130,27 +136,31 @@ const AdminOrders = () => {
             <div className="order-details">
               <div className="detail-row">
                 <span className="label">Customer:</span>
-                <span>{order.customerName}</span>
+                <span>{order.userId?.name || 'N/A'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="label">Email:</span>
+                <span>{order.userId?.email || 'N/A'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Phone:</span>
-                <span>{order.phoneNumber}</span>
+                <span>{order.phoneNumber || 'N/A'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Address:</span>
-                <span>{order.address}</span>
+                <span>{order.address || 'N/A'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Recipe:</span>
-                <span>{order.recipe.name}</span>
+                <span>{order.recipe?.name || 'N/A'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Servings:</span>
-                <span>{order.servings}</span>
+                <span>{order.servings || 'N/A'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Total Amount:</span>
-                <span>Rs. {order.totalAmount.toFixed(2)}</span>
+                <span>Rs. {order.totalAmount?.toFixed(2) || '0.00'}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Ordered:</span>
@@ -166,10 +176,10 @@ const AdminOrders = () => {
 
             <div className="ingredients-list">
               <h4>Ingredients:</h4>
-              {order.ingredients.map((item, index) => (
+              {order.ingredients?.map((item, index) => (
                 <div key={index} className="ingredient-row">
-                  <span>{item.ingredient.name}</span>
-                  <span>{item.quantity} {item.ingredient.unit}</span>
+                  <span>{item.ingredient?.name || 'N/A'}</span>
+                  <span>{item.quantity} {item.ingredient?.unit || ''}</span>
                 </div>
               ))}
             </div>

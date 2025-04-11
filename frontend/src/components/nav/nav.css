@@ -83,6 +83,21 @@
     color: #16A34A;
   }
   
+  .admin-dashboard-link {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: inherit;
+    font-weight: 500;
+    padding: 0;
+    transition: color 0.3s ease;
+  }
+  
+  .admin-dashboard-link:hover {
+    color: #16A34A;
+  }
+  
   /* Media Queries for Responsive Design */
   @media (max-width: 768px) {
     .menu-toggle {

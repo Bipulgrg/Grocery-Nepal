@@ -1,27 +1,59 @@
 .admin-orders {
-  padding: 20px;
+  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .admin-orders h2 {
-  color: #1f2937;
-  margin-bottom: 20px;
+  color: #374151;
+  margin-bottom: 24px;
   font-size: 24px;
+}
+
+.order-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #F3F4F6;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6B7280;
+}
+
+.tab-button:hover {
+  background-color: #E5E7EB;
+  color: #16A34A;
+}
+
+.tab-button.active {
+  background-color: #16A34A;
+  color: white;
 }
 
 .orders-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 24px;
 }
 
 .order-card {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 24px;
   transition: transform 0.2s;
+  min-height: 400px;
 }
 
 .order-card:hover {
@@ -33,14 +65,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .order-id {
   font-weight: 600;
-  color: #1f2937;
+  color: #374151;
 }
 
 .status-container {
@@ -58,6 +90,7 @@
   padding-right: 30px;
   min-width: 120px;
   text-align: center;
+  background-color: #16A34A;
 }
 
 .status-select:focus {
@@ -66,7 +99,7 @@
 
 .status-select option {
   background: white;
-  color: #1f2937;
+  color: #374151;
 }
 
 .payment-method {
@@ -75,6 +108,7 @@
   color: white;
   font-weight: 500;
   font-size: 14px;
+  background-color: #16A34A;
 }
 
 .order-details {
@@ -89,19 +123,19 @@
 }
 
 .detail-row .label {
-  color: #6b7280;
+  color: #6B7280;
   font-weight: 500;
 }
 
 .ingredients-list {
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #E5E7EB;
 }
 
 .ingredients-list h4 {
   margin-bottom: 10px;
-  color: #1f2937;
+  color: #374151;
   font-size: 16px;
 }
 
@@ -110,25 +144,25 @@
   justify-content: space-between;
   margin-bottom: 6px;
   font-size: 14px;
-  color: #4b5563;
+  color: #4B5563;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #6b7280;
+  color: #6B7280;
 }
 
 .error {
   text-align: center;
   padding: 40px;
-  color: #ef4444;
+  color: #EF4444;
 }
 
 .no-orders {
   text-align: center;
   padding: 40px;
-  color: #6b7280;
+  color: #6B7280;
 }
 
 @media (max-width: 768px) {
@@ -145,4 +179,4 @@
   .status-select {
     width: 100%;
   }
-} 
+}

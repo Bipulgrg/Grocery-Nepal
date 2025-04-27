@@ -2,14 +2,14 @@
   max-width: 800px;
   margin: 40px auto;
   padding: 20px;
-  background: white;
+  background: #F3F4F6;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .admin-container h2 {
   text-align: center;
-  color: #333;
+  color: #374151;
   margin-bottom: 30px;
 }
 
@@ -27,7 +27,7 @@
 
 .form-group label {
   font-weight: 500;
-  color: #444;
+  color: #666;
 }
 
 .admin-form input,
@@ -292,4 +292,4 @@
 .admin-form input {
   color: #1f2937;
   background-color: white;
-} 
+}

@@ -1,12 +1,30 @@
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+require('dotenv').config();
 
+// Verify Cloudinary credentials
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (!cloudName || !apiKey || !apiSecret) {
+  console.error('Missing Cloudinary credentials:');
+  console.error('CLOUDINARY_CLOUD_NAME:', cloudName ? 'Present' : 'Missing');
+  console.error('CLOUDINARY_API_KEY:', apiKey ? 'Present' : 'Missing');
+  console.error('CLOUDINARY_API_SECRET:', apiSecret ? 'Present' : 'Missing');
+  throw new Error('Missing required Cloudinary credentials');
+}
+
+// Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret
 });
+
+// Test the configuration
+cloudinary.config().cloud_name; // This will throw an error if not configured properly
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -19,4 +37,4 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-module.exports = { cloudinary, upload }; 
+module.exports = { cloudinary, upload };

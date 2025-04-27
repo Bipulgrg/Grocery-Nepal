@@ -5,6 +5,7 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('active');
 
   useEffect(() => {
     fetchOrders();
@@ -34,6 +35,19 @@ const AdminOrders = () => {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getFilteredOrders = () => {
+    switch (activeFilter) {
+      case 'active':
+        return orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status));
+      case 'completed':
+        return orders.filter(order => order.status === 'delivered');
+      case 'failed':
+        return orders.filter(order => order.status === 'failed');
+      default:
+        return orders;
     }
   };
 
@@ -106,9 +120,29 @@ const AdminOrders = () => {
 
   return (
     <div className="admin-orders">
-      <h2>All Orders</h2>
+      <h2>Orders Management</h2>
+      <div className="order-tabs">
+        <button 
+          className={`tab-button ${activeFilter === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('active')}
+        >
+          🟢 Active Orders ({orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status)).length})
+        </button>
+        <button 
+          className={`tab-button ${activeFilter === 'completed' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('completed')}
+        >
+          ✅ Completed Orders ({orders.filter(order => order.status === 'delivered').length})
+        </button>
+        <button 
+          className={`tab-button ${activeFilter === 'failed' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('failed')}
+        >
+          ❌ Failed Orders ({orders.filter(order => order.status === 'failed').length})
+        </button>
+      </div>
       <div className="orders-list">
-        {orders.map((order) => (
+        {getFilteredOrders().map((order) => (
           <div key={order._id} className="order-card">
             <div className="order-header">
               <span className="order-id">Order #{order._id}</span>

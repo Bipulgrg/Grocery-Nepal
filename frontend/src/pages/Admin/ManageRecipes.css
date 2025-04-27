@@ -1,22 +1,22 @@
 .manage-recipes {
-  padding: 2rem;
+  padding: 24px;
 }
 
 .manage-recipes h1 {
   margin-bottom: 2rem;
-  color: #1f2937;
+  color: #374151;
 }
 
 .recipes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  gap: 24px;
 }
 
 .recipe-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s ease;
 }
@@ -32,12 +32,12 @@
 }
 
 .recipe-info {
-  padding: 1.5rem;
+  padding: 16px;
 }
 
 .recipe-info h3 {
   margin: 0 0 1rem;
-  color: #1f2937;
+  color: #374151;
   font-size: 1.25rem;
 }
 
@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6b7280;
+  color: #16A34A;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -85,21 +85,21 @@
 }
 
 .edit-button {
-  background-color: #3b82f6;
+  background-color: #16A34A;
   color: white;
 }
 
 .edit-button:hover {
-  background-color: #2563eb;
+  background-color: #15803D;
 }
 
 .delete-button {
-  background-color: #ef4444;
+  background-color: #EF4444;
   color: white;
 }
 
 .delete-button:hover {
-  background-color: #dc2626;
+  background-color: #DC2626;
 }
 
 /* Edit Form Styles */
@@ -114,7 +114,7 @@
 
 .edit-form h2 {
   margin-bottom: 1.5rem;
-  color: #1f2937;
+  color: #374151;
 }
 
 .form-group {
@@ -169,12 +169,12 @@
 }
 
 .form-actions .save-button {
-  background-color: #10b981;
+  background-color: #16A34A;
   color: white;
 }
 
 .form-actions .save-button:hover {
-  background-color: #059669;
+  background-color: #15803D;
 }
 
 /* Loading and Error States */
@@ -186,5 +186,5 @@
 }
 
 .error {
-  color: #ef4444;
-} 
+  color: #EF4444;
+}

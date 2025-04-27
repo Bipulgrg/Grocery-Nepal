@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Recipe = require('../models/Recipe');
 const { upload } = require('../config/cloudinary');
+const { auth, isAdmin } = require('../middleware/auth');
 
 // Search recipes (move this before the :id route)
 router.get('/search', async (req, res) => {
@@ -17,6 +18,22 @@ router.get('/search', async (req, res) => {
     res.json(recipes);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Get single recipe by ID (place this after /search but before generic routes)
+router.get('/:id', async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id).populate('ingredients.ingredient');
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+    res.json(recipe);
+  } catch (error) {
+    if (error.name === 'CastError' || error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Recipe not found - Invalid ID format' });
+    }
+    res.status(500).json({ message: 'Error fetching recipe' });
   }
 });
 
@@ -44,63 +61,69 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single recipe by ID (place this after /search but before generic routes)
-router.get('/:id', async (req, res) => {
+// Add new recipe (admin only)
+router.post('/', auth, isAdmin, async (req, res, next) => {
   try {
-    const recipe = await Recipe.findById(req.params.id).populate('ingredients.ingredient');
-    if (!recipe) {
-      return res.status(404).json({ message: 'Recipe not found' });
-    }
-    res.json(recipe);
-  } catch (error) {
-    if (error.name === 'CastError' || error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'Recipe not found - Invalid ID format' });
-    }
-    res.status(500).json({ message: 'Error fetching recipe' });
-  }
-});
-
-// Add new recipe
-router.post('/', upload.single('image'), async (req, res) => {
-  try {
-    const { name, category, difficulty, time, description, ingredients } = req.body;
-
-    // Check if all fields are provided
-    if (!name || !category || !difficulty || !time || !description) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    // Check if image is provided
-    if (!req.file) {
-      return res.status(400).json({ message: 'Image is required' });
-    }
-
-    // Parse ingredients if provided
-    let parsedIngredients = [];
-    if (ingredients) {
-      try {
-        parsedIngredients = JSON.parse(ingredients);
-      } catch (err) {
-        return res.status(400).json({ message: 'Invalid ingredients format' });
+    // Handle image upload separately
+    upload.single('image')(req, res, async (err) => {
+      if (err) {
+        console.error('Multer/Cloudinary error:', err);
+        return res.status(400).json({ message: 'Error uploading image', error: err.message });
       }
-    }
 
-    const recipe = new Recipe({
-      name,
-      category,
-      difficulty,
-      time,
-      description,
-      image: req.file.path,
-      ingredients: parsedIngredients
+      try {
+        console.log('Received request body:', req.body);
+        console.log('Received file:', req.file);
+
+        const { name, category, difficulty, time, description, ingredients } = req.body;
+
+        // Check if all fields are provided
+        if (!name || !category || !difficulty || !time || !description) {
+          return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        // Check if image is provided
+        if (!req.file) {
+          return res.status(400).json({ message: 'Image is required' });
+        }
+
+        // Parse ingredients if provided
+        let parsedIngredients = [];
+        if (ingredients) {
+          try {
+            parsedIngredients = typeof ingredients === 'string' ? JSON.parse(ingredients) : ingredients;
+          } catch (err) {
+            console.error('Error parsing ingredients:', err);
+            return res.status(400).json({ message: 'Invalid ingredients format' });
+          }
+        }
+
+        const recipe = new Recipe({
+          name,
+          category,
+          difficulty,
+          time,
+          description,
+          image: req.file.path,
+          ingredients: parsedIngredients
+        });
+
+        console.log('Creating recipe:', recipe);
+
+        const savedRecipe = await recipe.save();
+        const populatedRecipe = await Recipe.findById(savedRecipe._id).populate('ingredients.ingredient');
+        res.status(201).json(populatedRecipe);
+      } catch (error) {
+        console.error('Error creating recipe:', error);
+        if (error.name === 'ValidationError') {
+          return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Error creating recipe', error: error.message });
+      }
     });
-
-    const savedRecipe = await recipe.save();
-    const populatedRecipe = await Recipe.findById(savedRecipe._id).populate('ingredients.ingredient');
-    res.status(201).json(populatedRecipe);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ message: 'Error creating recipe' });
+    console.error('Outer error:', error);
+    next(error);
   }
 });
 

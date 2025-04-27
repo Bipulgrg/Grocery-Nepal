@@ -127,6 +127,7 @@ const ManageRecipes = () => {
                 <option value="Desserts">Desserts</option>
                 <option value="Breakfast">Breakfast</option>
                 <option value="Drinks">Drinks</option>
+                <option value="Lunch/Dinner">Lunch/Dinner</option>
                 <option value="Snacks">Snacks</option>
               </select>
             </div>

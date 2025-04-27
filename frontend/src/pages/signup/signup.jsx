@@ -15,7 +15,16 @@ const SignUp = () => {
   const [success, setSuccess] = useState(null);
 
   const validateForm = () => {
-    const { phone, email, password, confirmPassword } = formData;
+    const { name, phone, email, password, confirmPassword } = formData;
+  
+    // Name validation
+    const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+    if (!name.trim()) {
+      return "Name is required.";
+    }
+    if (!nameRegex.test(name)) {
+      return "Name should contain only letters and spaces, and be between 2-50 characters long.";
+    }
   
     if (!/^\d{10}$/.test(phone)) {
       return "Phone number must be exactly 10 digits.";
@@ -38,8 +47,6 @@ const SignUp = () => {
     return null;
   };
   
-  
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -77,7 +84,7 @@ const SignUp = () => {
           <input 
             type="text" 
             name="name" 
-            placeholder="Full Name" 
+            placeholder="Username" 
             value={formData.name} 
             onChange={handleChange} 
             required 
@@ -117,17 +124,6 @@ const SignUp = () => {
 
           <button type="submit" className="auth-submit-btn">Create Account</button>
         </form>
-
-        <div className="divider">
-          <span>Or continue with</span>
-        </div>
-
-        <button className="google-btn">
-          <div className="google-icon"> 
-            <img src="/google.png" alt="Google Icon"/>
-          </div>
-          Continue with Google
-        </button>
 
         <p className="auth-footer">
           Already have an account? <a href="/signin">Sign in</a>

@@ -4,6 +4,7 @@ import Nav from './components/nav/nav'
 import Footer from './components/footer/footer'
 import SignIn from './pages/sigin/signin'
 import SignUp from './pages/signup/signup'
+import Profile from './pages/Profile/Profile'
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ForgotPassword/ResetPassword';
 import Hero from './components/heroSection/heroSection';
@@ -34,6 +35,7 @@ function App() {
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/recipes" element={<RecipeList />} />

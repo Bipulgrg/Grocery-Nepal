@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [orderStats, setOrderStats] = useState([]);
   const [categoryStats, setCategoryStats] = useState([]);
+  const [monthlySales, setMonthlySales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,6 +34,29 @@ const AdminDashboard = () => {
         if (!categoryResponse.ok) throw new Error('Failed to fetch category statistics');
         const categoryData = await categoryResponse.json();
         setCategoryStats(categoryData);
+
+        // Fetch monthly sales data
+        const salesResponse = await fetch('http://localhost:5000/api/orders/admin/monthly-sales', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!salesResponse.ok) {
+          throw new Error('Failed to fetch sales data');
+        }
+
+        const salesData = await salesResponse.json();
+        
+        // Transform the data with month names
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const transformedSalesData = salesData.map(item => ({
+          ...item,
+          name: monthNames[item.month - 1],
+          amount: item.totalSales
+        }));
+        
+        setMonthlySales(transformedSalesData);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
         setError(error.message);
@@ -214,6 +238,22 @@ const AdminDashboard = () => {
                         <Tooltip formatter={(value) => [`${value} recipes`, 'Count']} />
                         <Legend />
                       </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div className="chart-container">
+                    <h2>Monthly Sales</h2>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={monthlySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value) => [`Rs. ${value}`, 'Sales']}
+                          labelStyle={{ color: '#374151' }}
+                        />
+                        <Bar dataKey="amount" fill="#16A34A" />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>

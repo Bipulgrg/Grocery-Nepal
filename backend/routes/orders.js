@@ -161,4 +161,48 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router; 
+// Get monthly sales data (admin only)
+router.get('/admin/monthly-sales', auth, isAdmin, async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    
+    // Aggregate orders by month for the current year
+    const monthlySales = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered',  // Only count completed orders
+          createdAt: {
+            $gte: new Date(currentYear, 0, 1),  // Start of current year
+            $lte: new Date(currentYear, 11, 31) // End of current year
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          totalSales: { $sum: '$totalAmount' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Transform data to include all months (even those with no sales)
+    const monthlyData = Array.from({ length: 12 }, (_, i) => {
+      const monthData = monthlySales.find(item => item._id === i + 1);
+      return {
+        month: i + 1,
+        totalSales: monthData ? monthData.totalSales : 0,
+        count: monthData ? monthData.count : 0
+      };
+    });
+
+    res.json(monthlyData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+module.exports = router;

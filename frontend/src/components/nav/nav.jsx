@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './nav.css';
 
@@ -6,6 +6,8 @@ const Nav = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +15,16 @@ const Nav = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     setIsLoggedIn(!!token);
     setUserRole(user?.role);
+
+    // Close profile menu when clicking outside
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSignOut = () => {
@@ -25,6 +37,10 @@ const Nav = () => {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen(!profileMenuOpen);
   };
 
   const handleAdminDashboard = () => {
@@ -77,7 +93,24 @@ const Nav = () => {
               </Link>
             </>
           ) : (
-            <button className="signout" onClick={handleSignOut}>Sign Out</button>
+            <div className="profile-menu-container" ref={profileMenuRef}>
+              <button className="profile-button" onClick={toggleProfileMenu}>
+                <i className="fas fa-user-circle"></i>
+              </button>
+              {profileMenuOpen && (
+                <div className="profile-dropdown">
+                  <Link to="/profile" onClick={() => {
+                    setProfileMenuOpen(false);
+                    setMenuOpen(false);
+                  }}>
+                    <i className="fas fa-user"></i> Profile
+                  </Link>
+                  <button onClick={handleSignOut}>
+                    <i className="fas fa-sign-out-alt"></i> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

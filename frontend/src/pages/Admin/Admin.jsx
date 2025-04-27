@@ -94,30 +94,59 @@ const Admin = () => {
     setError('');
     setSuccess('');
 
-    if (!image) {
-      setError('Please select an image');
-      return;
-    }
-
-    if (selectedIngredients.length === 0) {
-      setError('Please add at least one ingredient');
-      return;
-    }
-
-    const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.name);
-    formDataToSend.append('category', formData.category);
-    formDataToSend.append('difficulty', formData.difficulty);
-    formDataToSend.append('time', formData.time);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('image', image);
-    formDataToSend.append('ingredients', JSON.stringify(selectedIngredients));
-
     try {
+      // Validate form data
+      if (!image) {
+        setError('Please select an image');
+        return;
+      }
+
+      if (selectedIngredients.length === 0) {
+        setError('Please add at least one ingredient');
+        return;
+      }
+
+      if (!formData.name || !formData.time || !formData.description) {
+        setError('Please fill in all required fields');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('You must be logged in to add a recipe');
+        return;
+      }
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('difficulty', formData.difficulty);
+      formDataToSend.append('time', formData.time);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('image', image);
+      formDataToSend.append('ingredients', JSON.stringify(selectedIngredients));
+
+      console.log('Sending recipe data:', {
+        name: formData.name,
+        category: formData.category,
+        difficulty: formData.difficulty,
+        time: formData.time,
+        description: formData.description,
+        ingredients: selectedIngredients
+      });
+
       const response = await fetch('http://localhost:5000/api/recipes', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formDataToSend
       });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
 
       const data = await response.json();
 
@@ -137,7 +166,8 @@ const Admin = () => {
       setImage(null);
       setPreview(null);
     } catch (err) {
-      setError(err.message);
+      console.error('Error adding recipe:', err);
+      setError(err.message || 'Failed to add recipe. Please try again.');
     }
   };
 
@@ -175,6 +205,7 @@ const Admin = () => {
             <option value="Desserts">Desserts</option>
             <option value="Breakfast">Breakfast</option>
             <option value="Drinks">Drinks</option>
+            <option value="Lunch/Dinner">Lunch/Dinner</option>
             <option value="Snacks">Snacks</option>
           </select>
         </div>

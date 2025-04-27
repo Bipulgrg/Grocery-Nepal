@@ -26,6 +26,7 @@ const RecipeList = () => {
     'Desserts',
     'Breakfast',
     'Drinks',
+    'Lunch/Dinner',
     'Snacks'
   ];
 

@@ -26,21 +26,10 @@ const SignIn = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="signin-container">
       <div className="auth-card">
         <h2 className="auth-title">Sign In</h2>
         <p className="auth-subtitle">Enter your details</p>
-
-        <button className="google-btn">
-          <div className="google-icon">
-            <img src="/google.png" alt="Google Icon"/>
-          </div>
-          Continue with Google
-        </button>
-
-        <div className="divider">
-          <span>or</span>
-        </div>
 
         {error && <p className="error-message">{error}</p>}
 

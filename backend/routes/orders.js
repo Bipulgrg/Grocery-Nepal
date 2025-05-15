@@ -16,6 +16,22 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'User ID is required' });
     }
 
+    // Handle old schema format (convert to new format)
+    if (req.body.recipe && !req.body.recipes) {
+      console.log('Converting old schema format to new schema format');
+      req.body.recipes = [{
+        recipeId: req.body.recipe,
+        ingredients: req.body.ingredients || [],
+        servings: req.body.servings || 1,
+        amount: req.body.totalAmount || 0
+      }];
+      
+      // Delete old fields
+      delete req.body.recipe;
+      delete req.body.ingredients;
+      delete req.body.servings;
+    }
+    
     const orderData = {
       ...req.body,
       userId: userId
@@ -28,8 +44,14 @@ router.post('/', auth, async (req, res) => {
     
     // Populate necessary fields before sending response
     const populatedOrder = await Order.findById(order._id)
-      .populate('recipe')
-      .populate('ingredients.ingredient')
+      .populate({
+        path: 'recipes.recipeId',
+        select: 'name image price time difficulty category'
+      })
+      .populate({
+        path: 'recipes.ingredients.ingredient',
+        select: 'name price unit'
+      })
       .populate('userId', 'name email');
     
     res.status(201).json(populatedOrder);
@@ -42,13 +64,29 @@ router.post('/', auth, async (req, res) => {
 // Get all orders (admin only)
 router.get('/admin', auth, isAdmin, async (req, res) => {
   try {
+    console.log('Fetching admin orders');
     const orders = await Order.find()
-      .populate('recipe')
-      .populate('ingredients.ingredient')
+      .populate({
+        path: 'recipes.recipeId',
+        select: 'name image price time difficulty category'
+      })
+      .populate({
+        path: 'recipes.ingredients.ingredient',
+        select: 'name price unit'
+      })
       .populate('userId', 'name email') // Populate user details
       .sort({ createdAt: -1 });
+    
+    // Log the first order for debugging
+    if (orders.length > 0) {
+      console.log('First order structure:', JSON.stringify(orders[0], null, 2));
+    } else {
+      console.log('No orders found');
+    }
+    
     res.json(orders);
   } catch (error) {
+    console.error('Error fetching admin orders:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -57,11 +95,18 @@ router.get('/admin', auth, isAdmin, async (req, res) => {
 router.get('/my-orders', auth, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id })
-      .populate('recipe')
-      .populate('ingredients.ingredient')
+      .populate({
+        path: 'recipes.recipeId',
+        select: 'name image price time difficulty category'
+      })
+      .populate({
+        path: 'recipes.ingredients.ingredient',
+        select: 'name price unit'
+      })
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
+    console.error('Error fetching my orders:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -94,8 +139,14 @@ router.patch('/:id/status', auth, isAdmin, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate('recipe')
-      .populate('ingredients.ingredient')
+      .populate({
+        path: 'recipes.recipeId',
+        select: 'name image price time difficulty category'
+      })
+      .populate({
+        path: 'recipes.ingredients.ingredient',
+        select: 'name price unit'
+      })
       .populate('userId', 'name email');
 
     if (!order) {
@@ -109,6 +160,7 @@ router.get('/:id', auth, async (req, res) => {
 
     res.json(order);
   } catch (error) {
+    console.error('Error fetching order by ID:', error);
     res.status(500).json({ message: error.message });
   }
 });

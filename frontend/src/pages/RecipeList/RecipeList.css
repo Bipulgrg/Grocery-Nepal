@@ -65,47 +65,63 @@
   margin: 20px 0;
 }
 
+.recipe-card-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.recipe-card-container:hover {
+  transform: translateY(-4px);
+}
+
 .recipe-card {
-  background: #f9f9f9;
-  padding: 15px;
+  background: #fff;
   border-radius: 8px;
   text-align: left;
   position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .recipe-image {
   width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
 }
 
 .recipe-info {
   display: flex;
   flex-direction: column;
+  position: relative;
+  padding: 12px;
 }
 
 .time-tag {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #555;
-  color: white;
-  padding: 3px 6px;
+  top: 12px;
+  right: 14px;
+  background: #fff;
+  color: #333;
+  padding: 3px 10px;
   font-size: 12px;
-  border-radius: 4px;
+  border-radius: 16px;
+  font-weight: 500;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .difficulty {
   font-size: 12px;
-  color: gray;
-  margin-bottom: 5px;
+  color: #666;
+  margin-top: 5px;
 }
 
 .category-tag {
   font-size: 12px;
   color: #16A34A;
-  margin: 5px 0;
   font-weight: 500;
 }
 
@@ -143,11 +159,7 @@
   text-decoration: none;
   color: inherit;
   display: block;
-  transition: transform 0.2s;
-}
-
-.recipe-link:hover {
-  transform: translateY(-4px);
+  flex: 1;
 }
 
 @media (max-width: 1024px) {
@@ -265,4 +277,86 @@
 .no-recipes-found p {
   font-size: 1.1rem;
   color: #555;
+}
+
+/* Recipe Card Bottom Layout */
+.recipe-card-bottom {
+  display: flex;
+  margin-top: 5px;
+}
+
+/* Small Add to Cart Button */
+.add-to-cart-btn-small {
+  padding: 4px 8px;
+  background-color: transparent;
+  color: #16A34A;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  text-align: right;
+  margin-top: 8px;
+  align-self: flex-end;
+}
+
+.add-to-cart-btn-small:hover {
+  color: #128a3e;
+  text-decoration: underline;
+}
+
+.add-to-cart-btn-small.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn-small i {
+  font-size: 0.8rem;
+}
+
+/* Cart Success Message */
+.cart-success-message {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background-color: #16A34A;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 100;
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.cart-success-message i {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.cart-success-message span {
+  flex: 1;
+}
+
+.view-cart-btn {
+  background-color: white;
+  color: #16A34A;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.view-cart-btn:hover {
+  background-color: #f0f0f0;
 }

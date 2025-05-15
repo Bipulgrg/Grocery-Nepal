@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import "./RecipeList.css";
 
 const ITEMS_PER_PAGE = 6;
 
 const RecipeList = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialSearch = searchParams.get("q") || "";
   const initialCategory = searchParams.get("category") || "";
 
@@ -17,13 +18,15 @@ const RecipeList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [addingToCart, setAddingToCart] = useState(null);
+  const [cartSuccess, setCartSuccess] = useState(null);
 
   const categories = [
     'All',
     'Quick Meals',
     'Vegetarian',
     'Healthy',
-    'Desserts',
+
     'Breakfast',
     'Drinks',
     'Lunch/Dinner',
@@ -59,6 +62,66 @@ const RecipeList = () => {
   const handleRetry = () => {
     setError(null);
     setRetryCount(prevCount => prevCount + 1);
+  };
+
+  // Add to cart function
+  const handleAddToCart = async (recipe, e) => {
+    e.preventDefault(); // Prevent navigating to recipe details
+    e.stopPropagation(); // Stop event bubbling
+    
+    try {
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/signin', { state: { from: '/recipes' } });
+        return;
+      }
+      
+      setAddingToCart(recipe._id);
+      
+      // Fetch recipe details to get ingredients
+      const recipeResponse = await fetch(`http://localhost:5000/api/recipes/${recipe._id}`);
+      
+      if (!recipeResponse.ok) {
+        throw new Error('Failed to fetch recipe details');
+      }
+      
+      const recipeData = await recipeResponse.json();
+      
+      // Prepare selected ingredients from recipe
+      const selectedIngredients = recipeData.ingredients.map(item => ({
+        ingredient: item.ingredient._id,
+        quantity: item.quantity
+      }));
+      
+      // Add to cart API call
+      const response = await fetch('http://localhost:5000/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipeId: recipe._id,
+          quantity: 1,
+          selectedIngredients
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add to cart');
+      }
+      
+      // Show success message
+      setCartSuccess(recipe.name);
+      setTimeout(() => setCartSuccess(null), 3000);
+      
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      setError('Failed to add item to cart. Please try again.');
+    } finally {
+      setAddingToCart(null);
+    }
   };
 
   // Fetch recipes based on search and category filters
@@ -131,6 +194,15 @@ const RecipeList = () => {
 
   return (
     <div className="container">
+      {cartSuccess && (
+        <div className="cart-success-message">
+          <i className="fas fa-check-circle"></i>
+          <span>{cartSuccess} added to cart!</span>
+          <button onClick={() => navigate('/cart')} className="view-cart-btn">
+            View Cart
+          </button>
+        </div>
+      )}
       <form className="recipe-search-bar" onSubmit={handleSearch}>
         <input
           type="text"
@@ -163,17 +235,30 @@ const RecipeList = () => {
         <>
           <div className="recipe-list">
             {paginatedRecipes.map((recipe) => (
-              <Link to={`/purchase/${recipe._id}`} key={recipe._id} className="recipe-link">
-                <div className="recipe-card">
-                  <img src={recipe.image} alt={recipe.name} className="recipe-image" />
-                  <div className="recipe-info">
+              <div key={recipe._id} className="recipe-card-container">
+                <Link to={`/purchase/${recipe._id}`} className="recipe-link">
+                  <div className="recipe-card">
+                    <img src={recipe.image} alt={recipe.name} className="recipe-image" />
                     <span className="time-tag">{recipe.time}</span>
-                    <span className="difficulty">{recipe.difficulty}</span>
-                    <h3>{recipe.name}</h3>
-                    <span className="category-tag">{recipe.category}</span>
+                    <div className="recipe-info">
+                      <span className="difficulty">{recipe.difficulty}</span>
+                      <h3>{recipe.name}</h3>
+                      <button 
+                        className={`add-to-cart-btn-small ${addingToCart === recipe._id ? 'loading' : ''}`}
+                        onClick={(e) => handleAddToCart(recipe, e)}
+                        disabled={addingToCart === recipe._id}
+                      >
+                        {addingToCart === recipe._id ? (
+                          <i className="fas fa-spinner fa-spin"></i>
+                        ) : (
+                          <>Add to Cart</>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+
+              </div>
             ))}
           </div>
 

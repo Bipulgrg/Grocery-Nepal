@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import './PaymentSuccess.css';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [orderData, setOrderData] = useState(null);
   const [orderSaved, setOrderSaved] = useState(false);
+  const [multipleOrders, setMultipleOrders] = useState(false);
+  const [orderIds, setOrderIds] = useState([]);
+  const [orderCount, setOrderCount] = useState(0);
 
   // Get parameters from eSewa callback
   const pid = searchParams.get('pid'); // Product ID
@@ -22,6 +26,14 @@ const PaymentSuccess = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/signin');
+      return;
+    }
+
+    // Check if this is a cart checkout with multiple orders
+    if (location.state && location.state.multipleOrders) {
+      setMultipleOrders(true);
+      setOrderIds(location.state.orderIds || []);
+      setOrderCount(location.state.orderCount || location.state.orderIds?.length || 0);
       return;
     }
 
@@ -50,7 +62,7 @@ const PaymentSuccess = () => {
     };
     
     checkAndProcessOrder();
-  }, [pid, amt, refId, oid, navigate]);
+  }, [pid, amt, refId, oid, navigate, location.state]);
 
   const handleEsewaCallback = async (orderDetails) => {
     try {
@@ -188,24 +200,45 @@ const PaymentSuccess = () => {
         <div className="icon-container success">
           <FaCheckCircle className="result-icon" />
         </div>
-        <h1>Payment Successful!</h1>
-        <p>Your order has been processed successfully.</p>
-        <p>You will receive a confirmation email shortly.</p>
-        {orderData && (
-          <div className="order-details">
-            <p><strong>Order Summary:</strong></p>
-            <p>Customer: {orderData.customerName}</p>
-            <p>Delivery Address: {orderData.address}</p>
-            <p>Phone: {orderData.phoneNumber}</p>
-            <p>Amount: Rs. {orderData.totalAmount?.toFixed(2)}</p>
-            <p><strong>Payment Method:</strong> eSewa</p>
-            {refId && <p><strong>Transaction ID:</strong> {refId}</p>}
-            <p><strong>Order Status:</strong> {orderSaved ? 'Confirmed' : 'Processing'}</p>
-          </div>
+        <h1>Order Successful!</h1>
+        
+        {multipleOrders ? (
+          // Display for multiple orders from cart checkout
+          <>
+            <p>Your cart checkout has been processed successfully!</p>
+            <p>{orderCount} recipes have been ordered and will be delivered to you soon.</p>
+            <div className="order-details">
+              <p><strong>Order Details:</strong></p>
+              <p>{orderCount} individual orders have been created.</p>
+              <p>You can view all your orders in the My Orders section.</p>
+            </div>
+          </>
+        ) : (
+          // Display for single order
+          <>
+            <p>Your order has been processed successfully.</p>
+            <p>You will receive a confirmation email shortly.</p>
+            {orderData && (
+              <div className="order-details">
+                <p><strong>Order Summary:</strong></p>
+                <p>Customer: {orderData.customerName}</p>
+                <p>Delivery Address: {orderData.address}</p>
+                <p>Phone: {orderData.phoneNumber}</p>
+                <p>Amount: Rs. {orderData.totalAmount?.toFixed(2)}</p>
+                <p><strong>Payment Method:</strong> {pid ? 'eSewa' : 'Cash On Delivery'}</p>
+              </div>
+            )}
+          </>
         )}
-        <Link to="/recipes" className="action-button success">
-          Continue Shopping
-        </Link>
+        
+        <div className="action-buttons">
+          <Link to="/orders" className="action-button back">
+            View My Orders
+          </Link>
+          <Link to="/recipes" className="action-button back">
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
   );

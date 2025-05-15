@@ -163,15 +163,26 @@ const MyOrders = () => {
 
               <div className="order-content">
                 <div className="recipe-info">
-                  <img 
-                    src={order.recipe.image} 
-                    alt={order.recipe.name} 
-                    className="recipe-image"
-                  />
-                  <div className="recipe-details">
-                    <h3>{order.recipe.name}</h3>
-                    <p>{order.servings} serving(s)</p>
-                  </div>
+                  {order.recipes && order.recipes.length > 0 ? (
+                    <div className="recipes-list">
+                      {order.recipes.map((recipe, index) => (
+                        <div key={index} className="recipe-item">
+                          <img 
+                            src={recipe.recipeId.image} 
+                            alt={recipe.recipeId.name} 
+                            className="recipe-image"
+                          />
+                          <div className="recipe-details">
+                            <h3>{recipe.recipeId.name}</h3>
+                            <p>{recipe.servings} serving(s)</p>
+                            <span className="recipe-amount">Rs. {recipe.amount.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-recipe">No recipe information</div>
+                  )}
                 </div>
 
                 <div className="order-details">
@@ -198,12 +209,20 @@ const MyOrders = () => {
                 <div className="ingredients-section">
                   <h4>Ingredients:</h4>
                   <div className="ingredients-grid">
-                    {order.ingredients.map((item, index) => (
-                      <div key={index} className="ingredient-item">
-                        <span>{item.ingredient.name}</span>
-                        <span>{item.quantity} {item.ingredient.unit}</span>
-                      </div>
-                    ))}
+                    {order.recipes && order.recipes.length > 0 ? (
+                      order.recipes.map((recipe, recipeIndex) => (
+                        <React.Fragment key={recipeIndex}>
+                          {recipe.ingredients && recipe.ingredients.map((item, index) => (
+                            <div key={`${recipeIndex}-${index}`} className="ingredient-item">
+                              <span>{item.ingredient.name}</span>
+                              <span>{item.quantity} {item.ingredient.unit}</span>
+                            </div>
+                          ))}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <div className="no-ingredients">No ingredients available</div>
+                    )}
                   </div>
                 </div>
               </div>

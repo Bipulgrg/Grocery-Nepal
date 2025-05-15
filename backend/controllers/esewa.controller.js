@@ -10,6 +10,9 @@ const EsewaInitiatePayment = async (req, res) => {
   const { amount, productId, orderDetails } = req.body;
 
   try {
+    console.log('eSewa payment request:', { amount, productId });
+    console.log('Order details:', JSON.stringify(orderDetails, null, 2));
+    
     // ✅ Use dynamic import() for ES modules
     const esewajs = await import('esewajs');
 
@@ -37,6 +40,22 @@ const EsewaInitiatePayment = async (req, res) => {
 
       // Save order record
       if (orderDetails) {
+        // Convert old schema format if needed
+        if (orderDetails.recipe && !orderDetails.recipes) {
+          console.log('Converting old schema format to new schema format in eSewa payment');
+          orderDetails.recipes = [{
+            recipeId: orderDetails.recipe,
+            ingredients: orderDetails.ingredients || [],
+            servings: orderDetails.servings || 1,
+            amount: orderDetails.totalAmount || 0
+          }];
+          
+          // Delete old fields
+          delete orderDetails.recipe;
+          delete orderDetails.ingredients;
+          delete orderDetails.servings;
+        }
+        
         const order = new Order({
           ...orderDetails,
           paymentMethod: 'esewa',
@@ -48,6 +67,8 @@ const EsewaInitiatePayment = async (req, res) => {
             paymentMethod: 'esewa'
           }
         });
+        
+        console.log('Creating eSewa order with data:', JSON.stringify(order, null, 2));
         await order.save();
       }
 
@@ -98,7 +119,7 @@ const paymentStatus = async (req, res) => {
       // Update order status
       const order = await Order.findOne({ 'paymentDetails.transactionId': product_id });
       if (order) {
-        order.status = status === 'success' ? 'paid' : 'failed';
+        order.status = status === 'success' ? 'delivered' : 'failed';
         order.paymentDetails.paymentStatus = status;
         order.paymentDetails.paymentDate = new Date();
         await order.save();

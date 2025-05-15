@@ -18,18 +18,29 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  recipe: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Recipe',
-    required: true
-  },
-  ingredients: [{
-    ingredient: {
+  recipes: [{
+    recipeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Ingredient',
+      ref: 'Recipe',
       required: true
     },
-    quantity: {
+    ingredients: [{
+      ingredient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ingredient',
+        required: true
+      },
+      quantity: {
+        type: Number,
+        required: true
+      }
+    }],
+    servings: {
+      type: Number,
+      required: true,
+      default: 1
+    },
+    amount: {
       type: Number,
       required: true
     }
@@ -42,10 +53,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'out_for_delivery', 'delivered', 'failed'],
     default: 'pending'
-  },
-  servings: {
-    type: Number,
-    required: true
   },
   paymentMethod: {
     type: String,

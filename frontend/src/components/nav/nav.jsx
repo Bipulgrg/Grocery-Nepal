@@ -7,7 +7,10 @@ const Nav = () => {
   const [userRole, setUserRole] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
+  const [cartLoading, setCartLoading] = useState(false);
   const profileMenuRef = useRef(null);
+  const cartMenuRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +18,11 @@ const Nav = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     setIsLoggedIn(!!token);
     setUserRole(user?.role);
+
+    // Fetch cart data if logged in
+    if (token) {
+      fetchCartData(token);
+    }
 
     // Close profile menu when clicking outside
     const handleClickOutside = (event) => {
@@ -26,6 +34,29 @@ const Nav = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  
+  // Function to fetch cart data
+  const fetchCartData = async (token) => {
+    try {
+      setCartLoading(true);
+      const response = await fetch('http://localhost:5000/api/cart', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Calculate total number of items in cart
+        const itemCount = data.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+        setCartItemCount(itemCount);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    } finally {
+      setCartLoading(false);
+    }
+  };
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
@@ -66,7 +97,18 @@ const Nav = () => {
           <li><Link to="/categories" onClick={() => setMenuOpen(false)}>Categories</Link></li>
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>About</Link></li>
           {isLoggedIn && userRole !== 'admin' && (
-            <li><Link to="/orders" onClick={() => setMenuOpen(false)}>Orders</Link></li>
+            <>
+              <li><Link to="/orders" onClick={() => setMenuOpen(false)}>Orders</Link></li>
+              <li>
+                <Link to="/cart" className="cart-link" onClick={() => setMenuOpen(false)}>
+                  <i className="fas fa-shopping-cart"></i>
+                  <span>Cart</span>
+                  {cartItemCount > 0 && (
+                    <span className="cart-count">{cartItemCount}</span>
+                  )}
+                </Link>
+              </li>
+            </>
           )}
           {userRole === 'admin' && (
             <li>

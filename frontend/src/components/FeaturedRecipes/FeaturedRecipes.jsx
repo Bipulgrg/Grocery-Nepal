@@ -32,7 +32,7 @@ const FeaturedRecipes = () => {
 
   return (
     <div className="featured-recipes">
-      <div className="recipe-card-container">
+      <div className="featured-recipe-container">
         {recipes.map((recipe) => (
           <RecipeCard
             key={recipe._id}

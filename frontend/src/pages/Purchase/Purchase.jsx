@@ -174,10 +174,13 @@ const Purchase = () => {
         address: orderDetails.address,
         phoneNumber: orderDetails.phoneNumber,
         userId: userId, // Use the extracted userId
-        recipe: recipe._id,
-        ingredients: selectedIngredientsList,
+        recipes: [{
+          recipeId: recipe._id,
+          ingredients: selectedIngredientsList,
+          servings: quantity,
+          amount: calculateSubtotal()
+        }],
         totalAmount: calculateSubtotal(),
-        servings: quantity,
         paymentMethod: 'esewa',
         status: 'pending'
       };
@@ -262,10 +265,13 @@ const Purchase = () => {
           address: orderDetails.address,
           phoneNumber: orderDetails.phoneNumber,
           userId: userId, // Include userId from decoded token
-          recipe: recipe._id,
-          ingredients: selectedIngredientsList,
+          recipes: [{
+            recipeId: recipe._id,
+            ingredients: selectedIngredientsList,
+            servings: quantity,
+            amount: calculateSubtotal()
+          }],
           totalAmount: calculateSubtotal(),
-          servings: quantity,
           paymentMethod: 'cod',
           status: 'pending',
           paymentDetails: {

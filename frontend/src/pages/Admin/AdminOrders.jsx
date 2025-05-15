@@ -185,12 +185,20 @@ const AdminOrders = () => {
                 <span>{order.address || 'N/A'}</span>
               </div>
               <div className="detail-row">
-                <span className="label">Recipe:</span>
-                <span>{order.recipe?.name || 'N/A'}</span>
-              </div>
-              <div className="detail-row">
-                <span className="label">Servings:</span>
-                <span>{order.servings || 'N/A'}</span>
+                <span className="label">Recipes:</span>
+                <div className="recipes-list">
+                  {order.recipes && order.recipes.length > 0 ? (
+                    order.recipes.map((recipeItem, index) => (
+                      <div key={index} className="recipe-item">
+                        <span>{recipeItem.recipeId?.name || 'Unknown Recipe'}</span>
+                        <span className="recipe-servings">({recipeItem.servings} servings)</span>
+                        <span className="recipe-amount">Rs. {recipeItem.amount?.toFixed(2) || '0.00'}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span>No recipes</span>
+                  )}
+                </div>
               </div>
               <div className="detail-row">
                 <span className="label">Total Amount:</span>
@@ -210,12 +218,24 @@ const AdminOrders = () => {
 
             <div className="ingredients-list">
               <h4>Ingredients:</h4>
-              {order.ingredients?.map((item, index) => (
-                <div key={index} className="ingredient-row">
-                  <span>{item.ingredient?.name || 'N/A'}</span>
-                  <span>{item.quantity} {item.ingredient?.unit || ''}</span>
-                </div>
-              ))}
+              {order.recipes && order.recipes.length > 0 ? (
+                order.recipes.map((recipeItem, recipeIndex) => (
+                  <div key={recipeIndex} className="recipe-ingredients">
+                    {recipeItem.ingredients && recipeItem.ingredients.length > 0 ? (
+                      recipeItem.ingredients.map((ingredientItem, ingredientIndex) => (
+                        <div key={`${recipeIndex}-${ingredientIndex}`} className="ingredient-row">
+                          <span>{ingredientItem.ingredient?.name || 'N/A'}</span>
+                          <span>{ingredientItem.quantity} {ingredientItem.ingredient?.unit || ''}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-ingredients">No ingredients for this recipe</div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="no-ingredients">No ingredients found</div>
+              )}
             </div>
           </div>
         ))}

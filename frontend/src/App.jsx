@@ -24,6 +24,7 @@ import PaymentComponent from './pages/Payment/payment';
 import MyOrders from './pages/Orders/MyOrders';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About/About';
+import Cart from './pages/Cart/Cart';
 
 function App() {
   const location = useLocation();
@@ -45,6 +46,14 @@ function App() {
         <Route path="/payment/failed" element={<PaymentFailed />} />
         <Route path="/payment" element={<PaymentComponent />} />
         <Route path="/about" element={<About />} />
+        <Route 
+          path="/cart" 
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Protected Admin Routes */}
         <Route 

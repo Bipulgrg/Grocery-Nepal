@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const Ingredient = require('../models/Ingredient');
 const { auth, isAdmin } = require('../middleware/auth');
 
 // Create a new order (requires authentication)
@@ -38,6 +39,30 @@ router.post('/', auth, async (req, res) => {
     };
     
     console.log('Creating order with data:', orderData); // Debug log
+
+    // Update ingredient stock levels
+    for (const recipe of orderData.recipes) {
+      for (const ingredient of recipe.ingredients) {
+        const ingredientDoc = await Ingredient.findById(ingredient.ingredient);
+        if (!ingredientDoc) {
+          return res.status(400).json({ message: `Ingredient ${ingredient.ingredient} not found` });
+        }
+
+        // Calculate total quantity needed (quantity per recipe * number of servings)
+        const totalQuantity = ingredient.quantity * recipe.servings;
+
+        // Check if enough stock is available
+        if (ingredientDoc.stock < totalQuantity) {
+          return res.status(400).json({ 
+            message: `Not enough stock for ${ingredientDoc.name}. Available: ${ingredientDoc.stock} ${ingredientDoc.stockUnit}, Required: ${totalQuantity} ${ingredientDoc.stockUnit}`
+          });
+        }
+
+        // Reduce stock
+        ingredientDoc.stock -= totalQuantity;
+        await ingredientDoc.save();
+      }
+    }
     
     const order = new Order(orderData);
     await order.save();

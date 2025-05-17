@@ -6,9 +6,12 @@ const ManageRecipes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingRecipe, setEditingRecipe] = useState(null);
+  const [availableIngredients, setAvailableIngredients] = useState([]);
+  const [newIngredient, setNewIngredient] = useState({ ingredient: '', quantity: '', unit: '' });
 
   useEffect(() => {
     fetchRecipes();
+    fetchIngredients();
   }, []);
 
   const fetchRecipes = async () => {
@@ -23,6 +26,19 @@ const ManageRecipes = () => {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchIngredients = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/ingredients');
+      if (!response.ok) {
+        throw new Error('Failed to fetch ingredients');
+      }
+      const data = await response.json();
+      setAvailableIngredients(data);
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -80,6 +96,38 @@ const ManageRecipes = () => {
     } catch (error) {
       alert('Error updating recipe: ' + error.message);
     }
+  };
+
+  const handleAddIngredient = () => {
+    if (!newIngredient.ingredient || !newIngredient.quantity || !newIngredient.unit) {
+      alert('Please fill in all ingredient fields');
+      return;
+    }
+
+    setEditingRecipe({
+      ...editingRecipe,
+      ingredients: [...editingRecipe.ingredients, newIngredient]
+    });
+    setNewIngredient({ ingredient: '', quantity: '', unit: '' });
+  };
+
+  const handleRemoveIngredient = (index) => {
+    setEditingRecipe({
+      ...editingRecipe,
+      ingredients: editingRecipe.ingredients.filter((_, i) => i !== index)
+    });
+  };
+
+  const handleUpdateIngredient = (index, field, value) => {
+    const updatedIngredients = [...editingRecipe.ingredients];
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      [field]: value
+    };
+    setEditingRecipe({
+      ...editingRecipe,
+      ingredients: updatedIngredients
+    });
   };
 
   if (loading) {
@@ -171,6 +219,88 @@ const ManageRecipes = () => {
                 })}
                 required
               />
+            </div>
+
+            <div className="form-group ingredients-section">
+              <h3>Ingredients</h3>
+              <div className="ingredients-list">
+                {editingRecipe.ingredients.map((ingredient, index) => (
+                  <div key={index} className="ingredient-item">
+                    <select
+                      value={ingredient.ingredient}
+                      onChange={(e) => handleUpdateIngredient(index, 'ingredient', e.target.value)}
+                    >
+                      <option value="">Select Ingredient</option>
+                      {availableIngredients.map(ing => (
+                        <option key={ing._id} value={ing._id}>
+                          {ing.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={ingredient.quantity}
+                      onChange={(e) => handleUpdateIngredient(index, 'quantity', e.target.value)}
+                      placeholder="Quantity"
+                    />
+                    <input
+                      type="text"
+                      value={ingredient.unit}
+                      onChange={(e) => handleUpdateIngredient(index, 'unit', e.target.value)}
+                      placeholder="Unit"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveIngredient(index)}
+                      className="remove-ingredient"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="add-ingredient">
+                <select
+                  value={newIngredient.ingredient}
+                  onChange={(e) => setNewIngredient({
+                    ...newIngredient,
+                    ingredient: e.target.value
+                  })}
+                >
+                  <option value="">Select Ingredient</option>
+                  {availableIngredients.map(ing => (
+                    <option key={ing._id} value={ing._id}>
+                      {ing.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={newIngredient.quantity}
+                  onChange={(e) => setNewIngredient({
+                    ...newIngredient,
+                    quantity: e.target.value
+                  })}
+                  placeholder="Quantity"
+                />
+                <input
+                  type="text"
+                  value={newIngredient.unit}
+                  onChange={(e) => setNewIngredient({
+                    ...newIngredient,
+                    unit: e.target.value
+                  })}
+                  placeholder="Unit"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddIngredient}
+                  className="add-ingredient-button"
+                >
+                  Add Ingredient
+                </button>
+              </div>
             </div>
 
             <div className="form-actions">

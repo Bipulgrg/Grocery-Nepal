@@ -188,3 +188,79 @@
 .error {
   color: #EF4444;
 }
+
+.ingredients-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.ingredients-section h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.ingredients-list {
+  margin-bottom: 20px;
+}
+
+.ingredient-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.ingredient-item select,
+.ingredient-item input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.ingredient-item .remove-ingredient {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ingredient-item .remove-ingredient:hover {
+  background-color: #cc0000;
+}
+
+.add-ingredient {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.add-ingredient select,
+.add-ingredient input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.add-ingredient-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-ingredient-button:hover {
+  background-color: #45a049;
+}

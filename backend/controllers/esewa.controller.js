@@ -1,5 +1,6 @@
 const Transaction = require('../models/Transaction');
 const Order = require('../models/Order');
+const Ingredient = require('../models/Ingredient');
 
 /**
  * Initiates an eSewa payment
@@ -54,6 +55,30 @@ const EsewaInitiatePayment = async (req, res) => {
           delete orderDetails.recipe;
           delete orderDetails.ingredients;
           delete orderDetails.servings;
+        }
+
+        // Update ingredient stock levels
+        for (const recipe of orderDetails.recipes) {
+          for (const ingredient of recipe.ingredients) {
+            const ingredientDoc = await Ingredient.findById(ingredient.ingredient);
+            if (!ingredientDoc) {
+              return res.status(400).json({ message: `Ingredient ${ingredient.ingredient} not found` });
+            }
+
+            // Calculate total quantity needed (quantity per recipe * number of servings)
+            const totalQuantity = ingredient.quantity * recipe.servings;
+
+            // Check if enough stock is available
+            if (ingredientDoc.stock < totalQuantity) {
+              return res.status(400).json({ 
+                message: `Not enough stock for ${ingredientDoc.name}. Available: ${ingredientDoc.stock} ${ingredientDoc.stockUnit}, Required: ${totalQuantity} ${ingredientDoc.stockUnit}`
+              });
+            }
+
+            // Reduce stock
+            ingredientDoc.stock -= totalQuantity;
+            await ingredientDoc.save();
+          }
         }
         
         const order = new Order({

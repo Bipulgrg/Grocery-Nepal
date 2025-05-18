@@ -225,7 +225,7 @@ const PaymentSuccess = () => {
                 <p>Delivery Address: {orderData.address}</p>
                 <p>Phone: {orderData.phoneNumber}</p>
                 <p>Amount: Rs. {orderData.totalAmount?.toFixed(2)}</p>
-                <p><strong>Payment Method:</strong> {orderData?.paymentMethod === 'esewa' ? 'eSewa' : 'Cash On Delivery'}</p>
+                <p><strong>Payment Method:</strong> {pid ? 'eSewa' : 'Cash On Delivery'}</p>
               </div>
             )}
           </>

@@ -166,6 +166,13 @@ const AdminDashboard = () => {
               <i className="fas fa-shopping-bag"></i>
               <span>Orders</span>
             </Link>
+            <Link 
+              to="/admin/manage-users" 
+              className={`nav-item ${isActiveRoute('/admin/manage-users') ? 'active' : ''}`}
+            >
+              <i className="fas fa-users"></i>
+              <span>Manage Users</span>
+            </Link>
           </div>
         </nav>
       </div>

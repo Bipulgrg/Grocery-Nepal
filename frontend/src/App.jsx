@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom'; 
+import { BrowserRouter as Router, Route, Routes, useLocation, Link } from 'react-router-dom'; 
 import Nav from './components/nav/nav'
 import Footer from './components/footer/footer'
 import SignIn from './pages/sigin/signin'
@@ -25,6 +25,7 @@ import MyOrders from './pages/Orders/MyOrders';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About/About';
 import Cart from './pages/Cart/Cart';
+import ManageUsers from './pages/Admin/ManageUsers';
 
 function App() {
   const location = useLocation();
@@ -43,7 +44,7 @@ function App() {
         <Route path="/categories" element={<Categories />} />
         <Route path="/purchase/:id" element={<Purchase />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
-        <Route path="/payment/failed" element={<PaymentFailed />} />
+        <Route path="/payment-failure" element={<PaymentFailed />} />
         <Route path="/payment" element={<PaymentComponent />} />
         <Route path="/about" element={<About />} />
         <Route 
@@ -101,6 +102,14 @@ function App() {
           element={
             <ProtectedRoute requireAdmin={true}>
               <ManageIngredients />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/manage-users" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <ManageUsers />
             </ProtectedRoute>
           } 
         />

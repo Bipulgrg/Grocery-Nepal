@@ -46,6 +46,8 @@ const AdminOrders = () => {
         return orders.filter(order => order.status === 'delivered');
       case 'failed':
         return orders.filter(order => order.status === 'failed');
+      case 'cancelled':
+        return orders.filter(order => order.status === 'cancelled');
       default:
         return orders;
     }
@@ -84,6 +86,8 @@ const AdminOrders = () => {
         return '#34D399';
       case 'failed':
         return '#EF4444';
+      case 'cancelled':
+        return '#9CA3AF';
       default:
         return '#9CA3AF';
     }
@@ -139,6 +143,12 @@ const AdminOrders = () => {
           onClick={() => setActiveFilter('failed')}
         >
           ❌ Failed Orders ({orders.filter(order => order.status === 'failed').length})
+        </button>
+        <button 
+          className={`tab-button ${activeFilter === 'cancelled' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('cancelled')}
+        >
+          🚫 Cancelled Orders ({orders.filter(order => order.status === 'cancelled').length})
         </button>
       </div>
       <div className="orders-list">

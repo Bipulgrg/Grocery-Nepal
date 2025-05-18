@@ -282,4 +282,46 @@ router.get('/admin/monthly-sales', auth, isAdmin, async (req, res) => {
   }
 });
 
+// Cancel order (user can cancel their own order)
+router.patch('/:id/cancel', auth, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Check if user is the order owner
+    if (order.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    // Only allow cancellation of pending orders
+    if (order.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending orders can be cancelled' });
+    }
+
+    // Update order status to cancelled
+    order.status = 'cancelled';
+    await order.save();
+
+    // Restore ingredient stock
+    for (const recipe of order.recipes) {
+      for (const ingredient of recipe.ingredients) {
+        const ingredientDoc = await Ingredient.findById(ingredient.ingredient);
+        if (ingredientDoc) {
+          // Calculate total quantity to restore (quantity per recipe * number of servings)
+          const totalQuantity = ingredient.quantity * recipe.servings;
+          ingredientDoc.stock += totalQuantity;
+          await ingredientDoc.save();
+        }
+      }
+    }
+    
+    res.json(order);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;

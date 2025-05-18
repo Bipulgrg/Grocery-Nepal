@@ -7,6 +7,7 @@ const MyOrders = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +42,37 @@ const MyOrders = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      setSuccessMessage('Order cancelled successfully');
+      fetchOrders(); // Refresh orders list
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+    } catch (error) {
+      setError(error.message);
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
@@ -51,6 +83,8 @@ const MyOrders = () => {
         return '#34D399';
       case 'failed':
         return '#EF4444';
+      case 'cancelled':
+        return '#9CA3AF';
       default:
         return '#9CA3AF';
     }
@@ -74,10 +108,17 @@ const MyOrders = () => {
   };
 
   const filteredOrders = orders.filter(order => {
-    if (activeTab === 'pending') {
-      return order.status !== 'delivered';
-    } else {
-      return order.status === 'delivered';
+    switch (activeTab) {
+      case 'pending':
+        return ['pending', 'out_for_delivery'].includes(order.status);
+      case 'delivered':
+        return order.status === 'delivered';
+      case 'failed':
+        return order.status === 'failed';
+      case 'cancelled':
+        return order.status === 'cancelled';
+      default:
+        return false;
     }
   });
 
@@ -120,25 +161,44 @@ const MyOrders = () => {
     <div className="my-orders-container">
       <h1>My Orders</h1>
       
+      {successMessage && (
+        <div className="success-message">
+          <i className="fas fa-check-circle"></i>
+          {successMessage}
+        </div>
+      )}
+      
       <div className="order-tabs">
         <button 
           className={`tab-button ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          Pending Orders
+          Pending Orders ({orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status)).length})
         </button>
         <button 
           className={`tab-button ${activeTab === 'delivered' ? 'active' : ''}`}
           onClick={() => setActiveTab('delivered')}
         >
-          Completed Orders
+          Completed Orders ({orders.filter(order => order.status === 'delivered').length})
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'failed' ? 'active' : ''}`}
+          onClick={() => setActiveTab('failed')}
+        >
+          Failed Orders ({orders.filter(order => order.status === 'failed').length})
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'cancelled' ? 'active' : ''}`}
+          onClick={() => setActiveTab('cancelled')}
+        >
+          Cancelled Orders ({orders.filter(order => order.status === 'cancelled').length})
         </button>
       </div>
 
       <div className="orders-grid">
         {filteredOrders.length === 0 ? (
           <div className="no-orders-message">
-            <p>No {activeTab === 'pending' ? 'pending' : 'completed'} orders found.</p>
+            <p>No {activeTab} orders found.</p>
           </div>
         ) : (
           filteredOrders.map((order) => (
@@ -225,6 +285,18 @@ const MyOrders = () => {
                     )}
                   </div>
                 </div>
+
+                {order.status === 'pending' && (
+                  <div className="order-actions">
+                    <button 
+                      className="cancel-button"
+                      onClick={() => handleCancelOrder(order._id)}
+                    >
+                      <i className="fas fa-times"></i>
+                      Cancel Order
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))

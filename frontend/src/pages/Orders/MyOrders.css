@@ -15,6 +15,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .tab-button {
@@ -26,6 +27,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .tab-button:hover {
@@ -326,4 +331,58 @@
     width: 120px;
     height: 120px;
   }
+
+  .order-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .tab-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.success-message {
+  background-color: #D1FAE5;
+  color: #065F46;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.success-message i {
+  font-size: 1.25rem;
+}
+
+.order-actions {
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.cancel-button:hover {
+  background-color: #FEE2E2;
+  border-color: #EF4444;
+}
+
+.cancel-button i {
+  font-size: 0.875rem;
 }

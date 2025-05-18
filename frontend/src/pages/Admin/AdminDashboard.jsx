@@ -14,6 +14,7 @@ const AdminDashboard = () => {
   const [orderStats, setOrderStats] = useState([]);
   const [categoryStats, setCategoryStats] = useState([]);
   const [monthlySales, setMonthlySales] = useState([]);
+  const [lowStockIngredients, setLowStockIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -57,6 +58,16 @@ const AdminDashboard = () => {
         }));
         
         setMonthlySales(transformedSalesData);
+
+        // Fetch ingredients to check for low stock
+        const ingredientsResponse = await fetch('http://localhost:5000/api/ingredients');
+        if (!ingredientsResponse.ok) throw new Error('Failed to fetch ingredients');
+        const ingredientsData = await ingredientsResponse.json();
+        
+        // Filter ingredients with stock less than 10 units
+        const lowStock = ingredientsData.filter(ingredient => ingredient.stock < 10);
+        setLowStockIngredients(lowStock);
+
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
         setError(error.message);
@@ -119,13 +130,13 @@ const AdminDashboard = () => {
         </div>
         <nav className="admin-nav">
           <div className="nav-section">
-              <Link 
+            <Link 
               to="/admindashboard" 
               className={`nav-item ${isActiveRoute('/admindashboard') ? 'active' : ''}`}
-              >
+            >
               <i className="fas fa-tachometer-alt"></i>
               <span>Dashboard</span>
-             </Link>
+            </Link>
             <div className="nav-section-title">Add New</div>
             <Link 
               to="/admindashboard/recipes/add" 
@@ -200,6 +211,31 @@ const AdminDashboard = () => {
               <div className="admin-welcome">
                 <h1>Welcome to Admin Dashboard</h1>
                 <p>Select an option from the sidebar to manage your content.</p>
+
+                {lowStockIngredients.length > 0 && (
+                  <div className="low-stock-warning">
+                    <div className="warning-header">
+                      <i className="fas fa-exclamation-triangle"></i>
+                      <h2>Low Stock Alert</h2>
+                    </div>
+                    <div className="low-stock-list">
+                      {lowStockIngredients.map(ingredient => (
+                        <div key={ingredient._id} className="low-stock-item">
+                          <span className="ingredient-name">{ingredient.name}</span>
+                          <span className="stock-amount">
+                            {ingredient.stock} {ingredient.stockUnit}
+                          </span>
+                          <Link 
+                            to="/admindashboard/ingredients/manage" 
+                            className="restock-button"
+                          >
+                            Restock
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="dashboard-charts">
                   <div className="chart-container">

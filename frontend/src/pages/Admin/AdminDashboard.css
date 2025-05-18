@@ -433,3 +433,76 @@
 .error-container button:hover {
   background-color: #2980b9;
 }
+
+.low-stock-warning {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.warning-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.warning-header i {
+  color: #DC2626;
+  font-size: 24px;
+}
+
+.warning-header h2 {
+  color: #DC2626;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.low-stock-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.low-stock-item {
+  background: white;
+  border: 1px solid #FCA5A5;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ingredient-name {
+  font-weight: 500;
+  color: #374151;
+  flex: 1;
+}
+
+.stock-amount {
+  color: #DC2626;
+  font-weight: 500;
+  padding: 4px 8px;
+  background: #FEE2E2;
+  border-radius: 4px;
+}
+
+.restock-button {
+  padding: 6px 12px;
+  background: #DC2626;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.restock-button:hover {
+  background: #B91C1C;
+}

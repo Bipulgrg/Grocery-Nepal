@@ -108,6 +108,15 @@ const Purchase = () => {
     }
   };
 
+  const handleQuantityInput = (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1) {
+      setQuantity(value);
+    } else if (e.target.value === '') {
+      setQuantity(1);
+    }
+  };
+
   const toggleIngredient = (ingredientId) => {
     const newSelected = new Set(selectedIngredients);
     if (newSelected.has(ingredientId)) {
@@ -173,7 +182,7 @@ const Purchase = () => {
         customerName: orderDetails.customerName,
         address: orderDetails.address,
         phoneNumber: orderDetails.phoneNumber,
-        userId: userId, // Use the extracted userId
+        userId: userId,
         recipes: [{
           recipeId: recipe._id,
           ingredients: selectedIngredientsList,
@@ -182,16 +191,33 @@ const Purchase = () => {
         }],
         totalAmount: calculateSubtotal(),
         paymentMethod: 'esewa',
-        status: 'pending'
+        status: 'pending',
+        paymentDetails: {
+          paymentMethod: 'esewa',
+          paymentStatus: 'pending',
+          paymentDate: new Date().toISOString()
+        }
       };
 
-      // Save order details to localStorage
-      localStorage.setItem('pendingOrder', JSON.stringify(orderData));
+      // Create the order first
+      const orderResponse = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
 
-      // Generate a unique order ID
-      const orderId = `ORDER-${Date.now()}`;
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.message || 'Failed to create order');
+      }
 
-      // Initiate eSewa payment
+      const createdOrder = await orderResponse.json();
+      console.log('Order created successfully:', createdOrder);
+
+      // Now initiate eSewa payment using the order ID
       const response = await fetch('http://localhost:5000/initiate-payment', {
         method: 'POST',
         headers: {
@@ -200,8 +226,7 @@ const Purchase = () => {
         },
         body: JSON.stringify({
           amount: calculateSubtotal(),
-          productId: orderId,
-          orderDetails: orderData
+          productId: createdOrder._id.toString()
         })
       });
 
@@ -409,7 +434,13 @@ const Purchase = () => {
           <span>{recipe.name} Ingredients</span>
           <div className="quantity-control">
             <button onClick={() => handleQuantityChange(-1)}>−</button>
-            <span>{quantity}</span>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={handleQuantityInput}
+              className="quantity-input"
+            />
             <button onClick={() => handleQuantityChange(1)}>+</button>
           </div>
         </div>

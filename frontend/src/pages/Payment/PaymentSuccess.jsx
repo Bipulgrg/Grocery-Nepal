@@ -93,41 +93,35 @@ const PaymentSuccess = () => {
         throw new Error(data.message || 'Failed to verify payment');
       }
 
-      // Create the order in the database if we have order details
-      if (orderDetails) {
-        const orderResponse = await fetch('http://localhost:5000/api/orders', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            ...orderDetails,
-            paymentMethod: 'esewa',
-            paymentStatus: 'paid',
-            paymentDetails: {
-              refId,
-              pid,
-              amount: amt,
-              transactionId: refId,
-              paymentDate: new Date().toISOString(),
-              status: 'COMPLETE'
-            }
-          })
-        });
+      // Update the existing order's payment status
+      const orderResponse = await fetch(`http://localhost:5000/api/orders/${pid}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: 'confirmed',
+          paymentDetails: {
+            refId,
+            pid,
+            amount: amt,
+            transactionId: refId,
+            paymentDate: new Date().toISOString(),
+            status: 'COMPLETE',
+            paymentMethod: 'esewa'
+          }
+        })
+      });
 
-        if (!orderResponse.ok) {
-          const errorData = await orderResponse.json();
-          throw new Error(errorData.message || 'Failed to create order after payment');
-        }
-
-        const savedOrder = await orderResponse.json();
-        console.log('Order saved successfully:', savedOrder);
-        
-        // Clear the pending order from localStorage
-        localStorage.removeItem('pendingOrder');
-        setOrderSaved(true);
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.message || 'Failed to update order payment status');
       }
+
+      const updatedOrder = await orderResponse.json();
+      console.log('Order payment status updated successfully:', updatedOrder);
+      setOrderSaved(true);
     } catch (error) {
       console.error('Payment verification error:', error);
       setError(error.message || 'Failed to verify payment');

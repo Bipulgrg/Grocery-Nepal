@@ -13,8 +13,7 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <ul>
             <li><a href="/about">About Us</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li><a href="/about">Contact</a></li>
           </ul>
         </div>
         <div className="footer-section categories">
@@ -29,9 +28,15 @@ const Footer = () => {
         <div className="footer-section social">
           <h3>Connect With Us</h3>
           <div className="social-icons">
-            <a href="#"><i className="fab fa-facebook"></i></a>
-            <a href="#"><i className="fab fa-instagram"></i></a>
-            <a href="#"><i className="fab fa-twitter"></i></a>
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+            <i className="fab fa-facebook"></i>
+          </a>
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+            <i className="fab fa-instagram"></i>
+          </a>
+          <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">
+            <i className="fab fa-twitter"></i>
+          </a>
           </div>
         </div>
       </div>

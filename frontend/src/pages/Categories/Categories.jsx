@@ -1,5 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  FaUtensils, 
+  FaLeaf, 
+  FaHeartbeat, 
+  FaBirthdayCake, 
+  FaCoffee, 
+  FaGlassMartiniAlt, 
+  FaCookie 
+} from 'react-icons/fa';
 import './Categories.css';
 
 const Categories = () => {
@@ -7,43 +16,43 @@ const Categories = () => {
     {
       id: 1,
       name: 'Quick Meals',
-      icon: '🥕',
+      icon: <FaUtensils />,
       items: 20
     },
     {
       id: 2,
       name: 'Vegetarian',
-      icon: '🍎',
+      icon: <FaLeaf />,
       items: 20
     },
     {
       id: 3,
       name: 'Healthy',
-      icon: '🫘',
+      icon: <FaHeartbeat />,
       items: 40
     },
     {
       id: 4,
       name: 'Desserts',
-      icon: '🍰',
+      icon: <FaBirthdayCake />,
       items: 20
     },
     {
       id: 5,
       name: 'Breakfast',
-      icon: '👨‍🍳',
+      icon: <FaCoffee />,
       items: 10
     },
     {
       id: 6,
       name: 'Drinks',
-      icon: '🥤',
+      icon: <FaGlassMartiniAlt />,
       items: 30
     },
     {
       id: 7,
       name: 'Snacks',
-      icon: '🍪',
+      icon: <FaCookie />,
       items: 15
     }
   ];

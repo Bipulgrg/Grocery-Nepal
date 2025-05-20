@@ -12,7 +12,7 @@ const RecipeCard = ({ title, description, time, image, addButtonLabel, recipeId 
         <p>{description}</p>
         <div className="recipe-info">
             <span className="recipe-time"><i className="fas fa-clock"></i> {time} mins</span>
-            <button className="add-to-cart-button" onClick={(e) => e.preventDefault()}>
+            <button className="add-to-cart-button" >
               {addButtonLabel}
             </button>
           </div>

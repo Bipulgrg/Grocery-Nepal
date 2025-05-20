@@ -2,11 +2,7 @@ const Transaction = require('../models/Transaction');
 const Order = require('../models/Order');
 const Ingredient = require('../models/Ingredient');
 
-/**
- * Initiates an eSewa payment
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+//initiate esewa paymentS
 const EsewaInitiatePayment = async (req, res) => {
   const { amount, productId, orderDetails } = req.body;
 
@@ -17,7 +13,7 @@ const EsewaInitiatePayment = async (req, res) => {
     console.log('eSewa payment request:', { amount: roundedAmount, productId });
     console.log('Order details:', JSON.stringify(orderDetails, null, 2));
     
-    // ✅ Use dynamic import() for ES modules
+    // Use dynamic import() for ES modules
     const esewajs = await import('esewajs');
 
     const reqPayment = await esewajs.EsewaPaymentGateway(
@@ -114,11 +110,7 @@ const EsewaInitiatePayment = async (req, res) => {
   }
 };
 
-/**
- * Processes the eSewa payment status callback
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+//esewa payment status
 const paymentStatus = async (req, res) => {
   const { product_id, status } = req.body;
 
@@ -129,7 +121,7 @@ const paymentStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "Transaction not found" });
     }
 
-    // ✅ Use dynamic import() for ES modules
+    // Use dynamic import() for ES modules
     const esewajs = await import('esewajs');
 
     const paymentStatusCheck = await esewajs.EsewaCheckStatus(

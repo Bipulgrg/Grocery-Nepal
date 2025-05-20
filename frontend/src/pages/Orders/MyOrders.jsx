@@ -248,41 +248,23 @@ const MyOrders = () => {
                 <div className="order-details">
                   <div className="detail-row">
                     <span className="label">Ordered On:</span>
-                    <span>{formatDate(order.createdAt)}</span>
+                    <span className="value">{formatDate(order.createdAt)}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="label">Customer Name:</span>
+                    <span className="value">{order.customerName}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="label">Delivery Address:</span>
+                    <span className="value">{order.address}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="label">Phone Number:</span>
+                    <span className="value">{order.phoneNumber}</span>
                   </div>
                   <div className="detail-row">
                     <span className="label">Total Amount:</span>
-                    <span>Rs. {order.totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Delivery To:</span>
-                    <span>{order.address}</span>
-                  </div>
-                  {order.paymentDetails && order.paymentDetails.transactionId && (
-                    <div className="detail-row">
-                      <span className="label">Transaction ID:</span>
-                      <span>{order.paymentDetails.transactionId}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="ingredients-section">
-                  <h4>Ingredients:</h4>
-                  <div className="ingredients-grid">
-                    {order.recipes && order.recipes.length > 0 ? (
-                      order.recipes.map((recipe, recipeIndex) => (
-                        <React.Fragment key={recipeIndex}>
-                          {recipe.ingredients && recipe.ingredients.map((item, index) => (
-                            <div key={`${recipeIndex}-${index}`} className="ingredient-item">
-                              <span>{item.ingredient.name}</span>
-                              <span>{item.quantity} {item.ingredient.unit}</span>
-                            </div>
-                          ))}
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <div className="no-ingredients">No ingredients available</div>
-                    )}
+                    <span className="value">Rs. {order.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -292,7 +274,6 @@ const MyOrders = () => {
                       className="cancel-button"
                       onClick={() => handleCancelOrder(order._id)}
                     >
-                      <i className="fas fa-times"></i>
                       Cancel Order
                     </button>
                   </div>

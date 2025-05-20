@@ -225,7 +225,7 @@ const Purchase = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          amount: calculateSubtotal(),
+          amount: calculateSubtotal() + 100,
           productId: createdOrder._id.toString()
         })
       });

@@ -231,7 +231,7 @@ const Cart = () => {
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-              amount: order.totalAmount,
+              amount: order.totalAmount + 100, // Add delivery charge
               productId: order._id.toString(),
               // Don't send order details since we've already created the order
             })

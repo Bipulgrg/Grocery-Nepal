@@ -127,6 +127,30 @@ router.post('/verify-code', async (req, res) => {
   }
 });
 
+// Check Previous Password
+router.post('/check-previous-password', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    // Check if the new password is the same as the current password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      return res.status(400).json({ 
+        message: "New password cannot be the same as your current password",
+        isPreviousPassword: true 
+      });
+    }
+
+    res.json({ isPreviousPassword: false });
+  } catch (error) {
+    console.error("Check Previous Password Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Reset Password
 router.post('/reset-password', async (req, res) => {
   const { email, code, password } = req.body;
@@ -138,6 +162,14 @@ router.post('/reset-password', async (req, res) => {
     // Verify code
     if (user.resetPasswordToken !== code || user.resetPasswordExpires < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired code" });
+    }
+
+    // Check if the new password is the same as the current password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      return res.status(400).json({ 
+        message: "New password cannot be the same as your current password" 
+      });
     }
 
     // Set plaintext password - pre-save hook will hash it

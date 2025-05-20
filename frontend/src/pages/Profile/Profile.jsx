@@ -104,6 +104,11 @@ const Profile = () => {
 
       const updatedUser = await response.json();
       setUser(updatedUser);
+      setFormData(prev => ({
+        ...prev,
+        name: updatedUser.name,
+        phone: updatedUser.phone
+      }));
       setSuccessMessage('Profile updated successfully!');
     } catch (err) {
       setError(err.message);
@@ -115,6 +120,19 @@ const Profile = () => {
     setError(null);
     setPasswordError('');
     setSuccessMessage('');
+
+    // Check if new password is same as current password
+    if (formData.currentPassword === formData.newPassword) {
+      setPasswordError('New password cannot be the same as your current password');
+      return;
+    }
+
+    // Strong password validation
+    const strongPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+    if (!strongPassword.test(formData.newPassword)) {
+      setPasswordError('Password must contain letters and numbers, minimum 6 characters');
+      return;
+    }
 
     if (formData.newPassword !== formData.confirmPassword) {
       setPasswordError('New passwords do not match');

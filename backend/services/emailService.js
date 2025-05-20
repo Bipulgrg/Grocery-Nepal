@@ -14,7 +14,7 @@ const sendOrderConfirmationEmail = async (order, userEmail) => {
     // Format order items
     const orderItems = order.recipes.map(recipe => {
       return `
-        Recipe: ${recipe.recipeId.name}
+        Recipe: ${recipe.recipeId?.name || 'Unknown Recipe'}
         Servings: ${recipe.servings}
         Amount: Rs. ${recipe.amount.toFixed(2)}
       `;

@@ -231,7 +231,7 @@ router.post('/checkout', auth, async (req, res) => {
       return res.status(400).json({ message: 'Missing required delivery information' });
     }
     
-    // Find the user's cart
+    // Find the user's cart with populated recipe data
     const cart = await Cart.findOne({ userId })
       .populate({
         path: 'items.recipe',
@@ -287,28 +287,36 @@ router.post('/checkout', auth, async (req, res) => {
     const newOrder = new Order(orderData);
     const order = await newOrder.save();
     
-    if (!order) {
-      return res.status(400).json({ message: 'Failed to create order' });
-    }
-    
-    // Clear the cart after successful order creation
-    cart.items = [];
-    await cart.save();
+    // Populate the order with recipe data before sending email
+    const populatedOrder = await Order.findById(order._id)
+      .populate({
+        path: 'recipes.recipeId',
+        select: 'name image price time difficulty category'
+      })
+      .populate({
+        path: 'recipes.ingredients.ingredient',
+        select: 'name price unit'
+      })
+      .populate('userId', 'name email');
 
-    // Get user's email
+    // Get user's email and send confirmation email
     const user = await User.findById(userId);
     if (user && user.email) {
       try {
-        // Send order confirmation email
-        await sendOrderConfirmationEmail(order, user.email);
+        // Send order confirmation email with populated order data
+        await sendOrderConfirmationEmail(populatedOrder, user.email);
       } catch (emailError) {
         console.error('Error sending order confirmation email:', emailError);
         // Don't fail the order creation if email fails
       }
     }
     
+    // Clear the cart after successful order creation
+    cart.items = [];
+    await cart.save();
+    
     res.status(201).json({ 
-      order,
+      order: populatedOrder,
       message: 'Order created successfully'
     });
   } catch (error) {

@@ -82,6 +82,23 @@
   transform: translateX(4px);
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #EF4444;
+  font-size: 1.1rem;
+  background-color: #FEE2E2;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
 @media (max-width: 768px) {
   .categories-container {
     padding: 1rem;

@@ -18,12 +18,12 @@ const SignUp = () => {
     const { name, phone, email, password, confirmPassword } = formData;
   
     // Name validation
-    const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+    const nameRegex = /^[a-zA-Z\s]{3,50}$/;
     if (!name.trim()) {
       return "Name is required.";
     }
     if (!nameRegex.test(name)) {
-      return "Name should contain only letters and spaces, and be between 2-50 characters long.";
+      return "Name should contain only letters and spaces, and be between 3-50 characters long.";
     }
   
     if (!/^\d{10}$/.test(phone)) {

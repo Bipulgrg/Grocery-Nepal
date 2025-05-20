@@ -6,6 +6,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -62,6 +64,24 @@ const Profile = () => {
     e.preventDefault();
     setError(null);
     setSuccessMessage('');
+    setNameError('');
+    setPhoneError('');
+
+    let isValid = true;
+    if (formData.name.trim().length < 3) {
+      setNameError('Name must be at least 3 characters long');
+      isValid = false;
+    }
+
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setPhoneError('Phone number must be exactly 10 digits');
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
@@ -78,7 +98,8 @@ const Profile = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
 
       const updatedUser = await response.json();
@@ -137,7 +158,7 @@ const Profile = () => {
     return <div className="profile-loading">Loading...</div>;
   }
 
-  if (error) {
+  if (error && !nameError && !phoneError) {
     return <div className="profile-error">Error: {error}</div>;
   }
 
@@ -147,7 +168,7 @@ const Profile = () => {
       {successMessage && (
         <div className="success-message">{successMessage}</div>
       )}
-      {error && (
+      {error && !nameError && !phoneError && (
         <div className="error-message">{error}</div>
       )}
 
@@ -164,6 +185,9 @@ const Profile = () => {
               onChange={handleInputChange}
               required
             />
+            {nameError && (
+              <div className="form-error">{nameError}</div>
+            )}
           </div>
 
           <div className="form-group">
@@ -188,6 +212,9 @@ const Profile = () => {
               onChange={handleInputChange}
               required
             />
+            {phoneError && (
+              <div className="form-error">{phoneError}</div>
+            )}
           </div>
 
           <button type="submit" className="update-button">

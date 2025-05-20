@@ -47,7 +47,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
-// app.use('/api/payment', require('./routes/transactionRoute'));
+app.use('/api/users', profileRoutes);
 
 // Esewa payment routes
 app.post("/initiate-payment", EsewaInitiatePayment);

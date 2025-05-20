@@ -4,9 +4,6 @@ const { auth } = require('../middleware/auth');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-// @route   GET /api/users/profile
-// @desc    Get user profile
-// @access  Private
 router.get('/profile', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -20,9 +17,6 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
-// @route   PUT /api/users/profile
-// @desc    Update user profile
-// @access  Private
 router.put('/profile', auth, async (req, res) => {
   try {
     const { name, phone } = req.body;
@@ -55,9 +49,6 @@ router.put('/profile', auth, async (req, res) => {
   }
 });
 
-// @route   PUT /api/users/change-password
-// @desc    Change user password
-// @access  Private
 router.put('/change-password', auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;

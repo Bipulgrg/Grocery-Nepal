@@ -413,8 +413,8 @@ const Purchase = () => {
         <div className="ingredients-section">
           <h2>Ingredients</h2>
           <div className="ingredients-list">
-            {recipe.ingredients.map((item) => (
-              <div key={item.ingredient._id} className="ingredient-item">
+            {recipe.ingredients.map((item, index) => (
+              <div key={`ingredient-${item.ingredient._id}-${index}`} className="ingredient-item">
                 <span className="ingredient-name">{item.ingredient.name}</span>
                 <span className="ingredient-quantity">
                   {item.quantity} {item.ingredient.unit}
@@ -446,9 +446,9 @@ const Purchase = () => {
         </div>
 
         <div className="cart-items">
-          {recipe.ingredients.map((item) => (
+          {recipe.ingredients.map((item, index) => (
             <div 
-              key={item.ingredient._id} 
+              key={`cart-item-${item.ingredient._id}-${index}`} 
               className={`cart-item ${selectedIngredients.has(item.ingredient._id) ? 'selected' : 'deselected'}`}
             >
               <div className="cart-item-header">

@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaUtensils, 
-  FaLeaf, 
-  FaHeartbeat, 
-  FaBirthdayCake, 
-  FaCoffee, 
-  FaGlassMartiniAlt, 
-  FaCookie 
-} from 'react-icons/fa';
+import { FaUtensils, FaLeaf, FaHeartbeat, FaBirthdayCake, FaCoffee, FaGlassMartiniAlt, FaCookie } from 'react-icons/fa';
 import './Categories.css';
 
 const Categories = () => {
@@ -19,7 +11,12 @@ const Categories = () => {
   useEffect(() => {
     const fetchCategoryStats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/dashboard/recipes/category-stats');
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/dashboard/recipes/category-stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch category statistics');
         }

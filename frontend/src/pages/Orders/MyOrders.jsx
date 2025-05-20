@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './MyOrders.css';
 
@@ -22,21 +23,14 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/orders/my-orders', {
+      const response = await axios.get('http://localhost:5000/api/orders/my-orders', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-
-      const data = await response.json();
-      setOrders(data);
+      setOrders(response.data);
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      setError(error.message);
+      setError(error.response?.data?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -45,28 +39,23 @@ const MyOrders = () => {
   const handleCancelOrder = async (orderId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      await axios.patch(
+        `http://localhost:5000/api/orders/${orderId}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
+      );
       setSuccessMessage('Order cancelled successfully');
-      fetchOrders(); // Refresh orders list
-      
-      // Clear success message after 3 seconds
+      fetchOrders();
+
       setTimeout(() => {
         setSuccessMessage(null);
       }, 3000);
     } catch (error) {
-      setError(error.message);
-      // Clear error message after 3 seconds
+      setError(error.response?.data?.message || 'Error cancelling order');
       setTimeout(() => {
         setError(null);
       }, 3000);
@@ -103,11 +92,9 @@ const MyOrders = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
-  };
+  const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders.filter((order) => {
     switch (activeTab) {
       case 'pending':
         return ['pending', 'out_for_delivery'].includes(order.status);
@@ -160,38 +147,38 @@ const MyOrders = () => {
   return (
     <div className="my-orders-container">
       <h1>My Orders</h1>
-      
+
       {successMessage && (
         <div className="success-message">
           <i className="fas fa-check-circle"></i>
           {successMessage}
         </div>
       )}
-      
+
       <div className="order-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          Pending Orders ({orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status)).length})
+          Pending Orders ({orders.filter((order) => ['pending', 'out_for_delivery'].includes(order.status)).length})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'delivered' ? 'active' : ''}`}
           onClick={() => setActiveTab('delivered')}
         >
-          Completed Orders ({orders.filter(order => order.status === 'delivered').length})
+          Completed Orders ({orders.filter((order) => order.status === 'delivered').length})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'failed' ? 'active' : ''}`}
           onClick={() => setActiveTab('failed')}
         >
-          Failed Orders ({orders.filter(order => order.status === 'failed').length})
+          Failed Orders ({orders.filter((order) => order.status === 'failed').length})
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'cancelled' ? 'active' : ''}`}
           onClick={() => setActiveTab('cancelled')}
         >
-          Cancelled Orders ({orders.filter(order => order.status === 'cancelled').length})
+          Cancelled Orders ({orders.filter((order) => order.status === 'cancelled').length})
         </button>
       </div>
 
@@ -206,16 +193,10 @@ const MyOrders = () => {
               <div className="order-header">
                 <div className="order-id">Order #{order._id.slice(-6)}</div>
                 <div className="status-badges">
-                  <span 
-                    className="status-badge"
-                    style={{ backgroundColor: getStatusColor(order.status) }}
-                  >
+                  <span className="status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
                     {order.status.replace('_', ' ')}
                   </span>
-                  <span 
-                    className="payment-badge"
-                    style={{ backgroundColor: getPaymentMethodColor(order.paymentMethod) }}
-                  >
+                  <span className="payment-badge" style={{ backgroundColor: getPaymentMethodColor(order.paymentMethod) }}>
                     {order.paymentMethod}
                   </span>
                 </div>
@@ -227,11 +208,7 @@ const MyOrders = () => {
                     <div className="recipes-list">
                       {order.recipes.map((recipe, index) => (
                         <div key={index} className="recipe-item">
-                          <img 
-                            src={recipe.recipeId.image} 
-                            alt={recipe.recipeId.name} 
-                            className="recipe-image"
-                          />
+                          <img src={recipe.recipeId.image} alt={recipe.recipeId.name} className="recipe-image" />
                           <div className="recipe-details">
                             <h3>{recipe.recipeId.name}</h3>
                             <p>{recipe.servings} serving(s)</p>
@@ -270,10 +247,7 @@ const MyOrders = () => {
 
                 {order.status === 'pending' && (
                   <div className="order-actions">
-                    <button 
-                      className="cancel-button"
-                      onClick={() => handleCancelOrder(order._id)}
-                    >
+                    <button className="cancel-button" onClick={() => handleCancelOrder(order._id)}>
                       Cancel Order
                     </button>
                   </div>

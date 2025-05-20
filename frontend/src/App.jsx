@@ -20,7 +20,6 @@ import ManageRecipes from './pages/Admin/ManageRecipes';
 import ManageIngredients from './pages/Admin/ManageIngredients';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import PaymentFailed from './pages/Payment/PaymentFailed';
-import PaymentComponent from './pages/Payment/payment';
 import MyOrders from './pages/Orders/MyOrders';
 import ProtectedRoute from './components/ProtectedRoute';
 import About from './pages/About/About';
@@ -45,7 +44,6 @@ function App() {
         <Route path="/purchase/:id" element={<Purchase />} />
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment-failure" element={<PaymentFailed />} />
-        <Route path="/payment" element={<PaymentComponent />} />
         <Route path="/about" element={<About />} />
         <Route 
           path="/cart" 

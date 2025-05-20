@@ -4,7 +4,7 @@ const Recipe = require('../models/Recipe');
 const { upload } = require('../config/cloudinary');
 const { auth, isAdmin } = require('../middleware/auth');
 
-// Search recipes (move this before the :id route)
+// Search recipes
 router.get('/search', async (req, res) => {
   try {
     const { query, category } = req.query;
@@ -21,7 +21,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Get single recipe by ID (place this after /search but before generic routes)
+// Get single recipe by ID
 router.get('/:id', async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id).populate('ingredients.ingredient');

@@ -4,7 +4,6 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
 // Register user
 router.post('/register', async (req, res) => {
@@ -54,10 +53,10 @@ router.post('/login', async (req, res) => {
 
 // Configure Nodemailer Transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Use Gmail, or replace with your SMTP provider
+  service: "gmail", 
   auth: {
-    user: process.env.EMAIL_USER, // Your email
-    pass: process.env.EMAIL_PASS, // Your app password (not your real password)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
@@ -129,7 +128,6 @@ router.post('/verify-code', async (req, res) => {
 });
 
 // Reset Password
-// auth.js - Reset Password Route (corrected)
 router.post('/reset-password', async (req, res) => {
   const { email, code, password } = req.body;
 
@@ -137,7 +135,7 @@ router.post('/reset-password', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    // Verify code (existing logic)
+    // Verify code
     if (user.resetPasswordToken !== code || user.resetPasswordExpires < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired code" });
     }

@@ -161,9 +161,12 @@ const Cart = () => {
   const calculateTotal = () => {
     if (!cart || !cart.items || cart.items.length === 0) return 0;
     
-    return cart.items.reduce((total, item) => {
+    const subtotal = cart.items.reduce((total, item) => {
       return total + calculateItemSubtotal(item);
     }, 0);
+    
+    const deliveryCharge = 100; // Define delivery charge
+    return subtotal + deliveryCharge;
   };
 
   // Handle checkout form submission
@@ -380,14 +383,14 @@ const Cart = () => {
                     <li key={ingItem.ingredient._id}>
                       <span>{ingItem.ingredient.name}</span>
                       <span className="grocery-ingredient-price">
-                        Rs. {ingItem.ingredient.price * ingItem.quantity}
+                        Rs. {(ingItem.ingredient.price * ingItem.quantity).toFixed(2)}
                       </span>
                     </li>
                   ))}
                 </ul>
                 <div className="grocery-item-subtotal">
                   <span>Subtotal:</span>
-                  <span className="price">Rs. {calculateItemSubtotal(item)}</span>
+                  <span className="price">Rs. {calculateItemSubtotal(item).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -396,13 +399,21 @@ const Cart = () => {
         
         <div className="grocery-cart-summary">
           <h2>Order Summary</h2>
-          <div className="grocery-summary-row">
-            <span>Items ({cart.items.reduce((total, item) => total + item.quantity, 0)}):</span>
-            <span>Rs. {calculateTotal()}</span>
+          {cart.items.map(item => (
+            <div key={item._id} className="cart-summary-item">
+              <p>{item.recipe.name} (x{item.quantity})</p>
+              <p>Rs. {calculateItemSubtotal(item).toFixed(2)}</p>
+            </div>
+          ))}
+          <hr/>
+          <div className="cart-summary-item">
+            <p>Delivery Charge</p>
+            <p>Rs. {100.00.toFixed(2)}</p>
           </div>
-          <div className="grocery-summary-row total">
-            <span>Total:</span>
-            <span>Rs. {calculateTotal()}</span>
+          <hr/>
+          <div className="cart-summary-total">
+            <h3>Total</h3>
+            <h3>Rs. {calculateTotal().toFixed(2)}</h3>
           </div>
           <button 
             className="grocery-checkout-button"

@@ -3,8 +3,10 @@ const router = express.Router();
 const Cart = require('../models/Cart');
 const Recipe = require('../models/Recipe');
 const Order = require('../models/Order');
+const User = require('../models/User');
 const mongoose = require('mongoose');
 const { auth } = require('../middleware/auth');
+const { sendOrderConfirmationEmail } = require('../services/emailService');
 
 // Get user's cart
 router.get('/', auth, async (req, res) => {
@@ -292,6 +294,18 @@ router.post('/checkout', auth, async (req, res) => {
     // Clear the cart after successful order creation
     cart.items = [];
     await cart.save();
+
+    // Get user's email
+    const user = await User.findById(userId);
+    if (user && user.email) {
+      try {
+        // Send order confirmation email
+        await sendOrderConfirmationEmail(order, user.email);
+      } catch (emailError) {
+        console.error('Error sending order confirmation email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+    }
     
     res.status(201).json({ 
       order,

@@ -11,14 +11,17 @@ const EsewaInitiatePayment = async (req, res) => {
   const { amount, productId, orderDetails } = req.body;
 
   try {
-    console.log('eSewa payment request:', { amount, productId });
+    // Round amount to whole number for eSewa
+    const roundedAmount = Math.round(parseFloat(amount));
+    
+    console.log('eSewa payment request:', { amount: roundedAmount, productId });
     console.log('Order details:', JSON.stringify(orderDetails, null, 2));
     
     // ✅ Use dynamic import() for ES modules
     const esewajs = await import('esewajs');
 
     const reqPayment = await esewajs.EsewaPaymentGateway(
-      amount, 0, 0, 0, productId,
+      roundedAmount, 0, 0, 0, productId,
       process.env.MERCHANT_ID,
       process.env.SECRET,
       process.env.SUCCESS_URL,
@@ -34,7 +37,7 @@ const EsewaInitiatePayment = async (req, res) => {
       // Save transaction record
       const transaction = new Transaction({
         product_id: productId,
-        amount: parseFloat(amount),
+        amount: roundedAmount,
         status: "PENDING"
       });
       await transaction.save();
@@ -48,7 +51,7 @@ const EsewaInitiatePayment = async (req, res) => {
             recipeId: orderDetails.recipe,
             ingredients: orderDetails.ingredients || [],
             servings: orderDetails.servings || 1,
-            amount: orderDetails.totalAmount || 0
+            amount: roundedAmount
           }];
           
           // Delete old fields

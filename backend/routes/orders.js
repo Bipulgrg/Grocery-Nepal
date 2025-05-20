@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Ingredient = require('../models/Ingredient');
+const User = require('../models/User');
 const { auth, isAdmin } = require('../middleware/auth');
+const { sendOrderConfirmationEmail } = require('../services/emailService');
 
 // Create a new order (requires authentication)
 router.post('/', auth, async (req, res) => {
@@ -38,7 +40,7 @@ router.post('/', auth, async (req, res) => {
       userId: userId
     };
     
-    console.log('Creating order with data:', orderData); // Debug log
+    console.log('Creating order with data:', orderData);
 
     // Update ingredient stock levels
     for (const recipe of orderData.recipes) {
@@ -78,6 +80,18 @@ router.post('/', auth, async (req, res) => {
         select: 'name price unit'
       })
       .populate('userId', 'name email');
+
+    // Get user's email and send confirmation email
+    const user = await User.findById(userId);
+    if (user && user.email) {
+      try {
+        // Send order confirmation email
+        await sendOrderConfirmationEmail(populatedOrder, user.email);
+      } catch (emailError) {
+        console.error('Error sending order confirmation email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+    }
     
     res.status(201).json(populatedOrder);
   } catch (error) {

@@ -154,7 +154,7 @@ router.get('/my-orders', auth, async (req, res) => {
 router.patch('/:id/status', auth, isAdmin, async (req, res) => {
   try {
     const { status } = req.body;
-    if (!['pending', 'out_for_delivery', 'delivered', 'failed', 'paid', 'cancelled'].includes(status)) {
+    if (!['pending', 'out_for_delivery', 'delivered', 'failed'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
     

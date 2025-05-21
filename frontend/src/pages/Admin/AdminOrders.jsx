@@ -41,7 +41,7 @@ const AdminOrders = () => {
   const getFilteredOrders = () => {
     switch (activeFilter) {
       case 'active':
-        return orders.filter(order => ['pending', 'out_for_delivery', 'paid'].includes(order.status));
+        return orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status));
       case 'completed':
         return orders.filter(order => order.status === 'delivered');
       case 'failed':
@@ -88,8 +88,6 @@ const AdminOrders = () => {
         return '#EF4444';
       case 'cancelled':
         return '#9CA3AF';
-      case 'paid':
-        return '#3B82F6';
       default:
         return '#9CA3AF';
     }
@@ -132,7 +130,7 @@ const AdminOrders = () => {
           className={`tab-button ${activeFilter === 'active' ? 'active' : ''}`}
           onClick={() => setActiveFilter('active')}
         >
-          🟢 Active Orders ({orders.filter(order => ['pending', 'out_for_delivery', 'paid'].includes(order.status)).length})
+          🟢 Active Orders ({orders.filter(order => ['pending', 'out_for_delivery'].includes(order.status)).length})
         </button>
         <button 
           className={`tab-button ${activeFilter === 'completed' ? 'active' : ''}`}
@@ -166,7 +164,6 @@ const AdminOrders = () => {
                   style={{ backgroundColor: getStatusColor(order.status) }}
                 >
                   <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
                   <option value="out_for_delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
                   <option value="failed">Failed</option>

@@ -141,6 +141,7 @@ const Purchase = () => {
   const handleEsewaPayment = async (e) => {
     e.preventDefault();
     setOrderError(null);
+    setProcessingPayment(true);
     
     try {
       const token = localStorage.getItem('token');
@@ -241,12 +242,15 @@ const Purchase = () => {
     } catch (error) {
       console.error('Payment error:', error);
       setOrderError(error.message || 'An error occurred while processing your payment. Please try again.');
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
     setOrderError(null);
+    setProcessingPayment(true);
 
     try {
       const token = localStorage.getItem('token');
@@ -333,6 +337,8 @@ const Purchase = () => {
     } catch (error) {
       console.error('Order error:', error);
       setOrderError(error.message || 'Failed to process order');
+    } finally {
+      setProcessingPayment(false);
     }
   };
 

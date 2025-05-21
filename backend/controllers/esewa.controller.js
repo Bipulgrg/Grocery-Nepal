@@ -139,8 +139,13 @@ const paymentStatus = async (req, res) => {
       // Update order status
       const order = await Order.findOne({ 'paymentDetails.transactionId': product_id });
       if (order) {
-        order.status = status === 'success' ? 'delivered' : 'failed';
-        order.paymentDetails.paymentStatus = status;
+        if (status === 'success') {
+          order.status = 'paid';
+          order.paymentDetails.paymentStatus = 'completed';
+        } else {
+          order.status = 'failed';
+          order.paymentDetails.paymentStatus = 'failed';
+        }
         order.paymentDetails.paymentDate = new Date();
         await order.save();
       }

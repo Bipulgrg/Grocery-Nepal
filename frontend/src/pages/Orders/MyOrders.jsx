@@ -74,6 +74,8 @@ const MyOrders = () => {
         return '#EF4444';
       case 'cancelled':
         return '#9CA3AF';
+      case 'paid':
+        return '#3B82F6';
       default:
         return '#9CA3AF';
     }
@@ -97,7 +99,7 @@ const MyOrders = () => {
   const filteredOrders = orders.filter((order) => {
     switch (activeTab) {
       case 'pending':
-        return ['pending', 'out_for_delivery'].includes(order.status);
+        return ['pending', 'out_for_delivery', 'paid'].includes(order.status);
       case 'delivered':
         return order.status === 'delivered';
       case 'failed':
@@ -160,7 +162,7 @@ const MyOrders = () => {
           className={`tab-button ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          Pending Orders ({orders.filter((order) => ['pending', 'out_for_delivery'].includes(order.status)).length})
+          Pending Orders ({orders.filter((order) => ['pending', 'out_for_delivery', 'paid'].includes(order.status)).length})
         </button>
         <button
           className={`tab-button ${activeTab === 'delivered' ? 'active' : ''}`}

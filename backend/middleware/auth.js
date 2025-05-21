@@ -22,8 +22,8 @@ const auth = async (req, res, next) => {
       role: user.role
     };
     
-    console.log('Auth middleware decoded token:', decoded);
-    console.log('Auth middleware set user:', req.user);
+    // console.log('Auth middleware decoded token:', decoded);
+    // console.log('Auth middleware set user:', req.user);
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);

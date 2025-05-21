@@ -240,7 +240,7 @@ const Purchase = () => {
       }
     } catch (error) {
       console.error('Payment error:', error);
-      setOrderError('An error occurred while processing your payment. Please try again.');
+      setOrderError(error.message || 'An error occurred while processing your payment. Please try again.');
     }
   };
 

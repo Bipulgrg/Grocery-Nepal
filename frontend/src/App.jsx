@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { BrowserRouter as Router, Route, Routes, useLocation, Link } from 'react-router-dom'; 
 import Nav from './components/nav/nav'
 import Footer from './components/footer/footer'
@@ -28,6 +28,10 @@ import ManageUsers from './pages/Admin/ManageUsers';
 
 function App() {
   const location = useLocation();
+  // useEffect(() => {
+  //   checkTokenExpiration(); // Logout if token expired
+  // }, [location.pathname]);
+
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/admindashboard');
 
   return (

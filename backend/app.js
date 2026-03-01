@@ -26,15 +26,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB connected');
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log('MongoDB connected');
+    }
   } catch (err) {
-    console.error(' MongoDB connection error:', err);
-    process.exit(1);
+    console.error('MongoDB connection error:', err);
+    // Don't exit in serverless - let requests fail gracefully
   }
 };
 
 connectDB();
+
+// Health check (no DB required)
+app.get('/', (req, res) => res.json({ ok: true, message: 'Backend is running' }));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

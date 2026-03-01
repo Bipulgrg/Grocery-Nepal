@@ -7,6 +7,7 @@ import AdminOrders from './AdminOrders';
 import ManageRecipes from './ManageRecipes';
 import ManageIngredients from './ManageIngredients';
 import './AdminDashboard.css';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -25,19 +26,19 @@ const AdminDashboard = () => {
         setError(null);
 
         // Fetch order statistics
-        const orderResponse = await fetch('http://localhost:5000/api/dashboard/orders/stats');
+        const orderResponse = await fetch(`${API_BASE_URL}/api/dashboard/orders/stats`);
         if (!orderResponse.ok) throw new Error('Failed to fetch order statistics');
         const orderData = await orderResponse.json();
         setOrderStats(orderData);
 
         // Fetch category statistics
-        const categoryResponse = await fetch('http://localhost:5000/api/dashboard/recipes/category-stats');
+        const categoryResponse = await fetch(`${API_BASE_URL}/api/dashboard/recipes/category-stats`);
         if (!categoryResponse.ok) throw new Error('Failed to fetch category statistics');
         const categoryData = await categoryResponse.json();
         setCategoryStats(categoryData);
 
         // Fetch monthly sales data
-        const salesResponse = await fetch('http://localhost:5000/api/orders/admin/monthly-sales', {
+        const salesResponse = await fetch(`${API_BASE_URL}/api/orders/admin/monthly-sales`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -60,7 +61,7 @@ const AdminDashboard = () => {
         setMonthlySales(transformedSalesData);
 
         // Fetch ingredients to check for low stock
-        const ingredientsResponse = await fetch('http://localhost:5000/api/ingredients');
+        const ingredientsResponse = await fetch(`${API_BASE_URL}/api/ingredients`);
         if (!ingredientsResponse.ok) throw new Error('Failed to fetch ingredients');
         const ingredientsData = await ingredientsResponse.json();
         

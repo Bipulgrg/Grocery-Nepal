@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './AdminOrders.css';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -18,7 +19,7 @@ const AdminOrders = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('http://localhost:5000/api/orders/admin', {
+      const response = await fetch(`${API_BASE_URL}/api/orders/admin`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -56,7 +57,7 @@ const AdminOrders = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

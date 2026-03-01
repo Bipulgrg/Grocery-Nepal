@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ManageRecipes.css';
+import { API_BASE_URL } from '../../config/api';
 
 const ManageRecipes = () => {
   const [recipes, setRecipes] = useState([]);
@@ -16,7 +17,7 @@ const ManageRecipes = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/recipes');
+      const response = await fetch(`${API_BASE_URL}/api/recipes`);
       if (!response.ok) {
         throw new Error('Failed to fetch recipes');
       }
@@ -31,7 +32,7 @@ const ManageRecipes = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/ingredients');
+      const response = await fetch(`${API_BASE_URL}/api/ingredients`);
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients');
       }
@@ -48,7 +49,7 @@ const ManageRecipes = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/recipes/${recipeId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}`, {
         method: 'DELETE'
       });
 
@@ -76,7 +77,7 @@ const ManageRecipes = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`http://localhost:5000/api/recipes/${editingRecipe._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/recipes/${editingRecipe._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './MyOrders.css';
+import { API_BASE_URL } from '../../config/api';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -23,7 +24,7 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/orders/my-orders', {
+      const response = await axios.get(`${API_BASE_URL}/api/orders/my-orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,7 +41,7 @@ const MyOrders = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:5000/api/orders/${orderId}/cancel`,
+        `${API_BASE_URL}/api/orders/${orderId}/cancel`,
         {},
         {
           headers: {

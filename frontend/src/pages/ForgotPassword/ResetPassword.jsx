@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './ResetPassword.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/api';
 
 const ResetPassword = () => {
   const [code, setCode] = useState('');
@@ -32,7 +33,7 @@ const ResetPassword = () => {
 
     try {
       // First check if the new password is the same as the previous password
-      const checkResponse = await axios.post("http://localhost:5000/api/auth/check-previous-password", {
+      const checkResponse = await axios.post(`${API_BASE_URL}/api/auth/check-previous-password`, {
         email,
         password
       });
@@ -43,7 +44,7 @@ const ResetPassword = () => {
       }
 
       // If not the same as previous password, proceed with reset
-      const response = await axios.post("http://localhost:5000/api/auth/reset-password", {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/reset-password`, {
         email,
         code,
         password,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Cart.css';
+import { API_BASE_URL } from '../../config/api';
 
 const Cart = () => {
   const [cart, setCart] = useState(null);
@@ -33,7 +34,7 @@ const Cart = () => {
         return;
       }
       
-      const response = await fetch('http://localhost:5000/api/cart', {
+      const response = await fetch(`${API_BASE_URL}/api/cart`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -58,7 +59,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/cart/update/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/cart/update/${itemId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/cart/remove/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/cart/remove/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -129,7 +130,7 @@ const Cart = () => {
         updatedIngredients.splice(existingIndex, 1);
       }
       
-      const response = await fetch(`http://localhost:5000/api/cart/update/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/cart/update/${itemId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ const Cart = () => {
       // For eSewa payment, handle directly similar to Purchase page
       if (paymentMethod === 'esewa') {
         // First create the order to get order ID
-        const checkoutResponse = await fetch('http://localhost:5000/api/cart/checkout', {
+        const checkoutResponse = await fetch(`${API_BASE_URL}/api/cart/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -224,7 +225,7 @@ const Cart = () => {
         console.log('Initiating eSewa payment for order:', order._id);
         
         try {
-          const response = await fetch('http://localhost:5000/initiate-payment', {
+          const response = await fetch(`${API_BASE_URL}/initiate-payment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -258,7 +259,7 @@ const Cart = () => {
         
       } else {
         // Regular COD checkout flow
-        const response = await fetch('http://localhost:5000/api/cart/checkout', {
+        const response = await fetch(`${API_BASE_URL}/api/cart/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

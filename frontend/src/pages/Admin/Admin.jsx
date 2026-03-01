@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Admin.css';
+import { API_BASE_URL } from '../../config/api';
 
 const Admin = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ const Admin = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/ingredients');
+      const response = await fetch(`${API_BASE_URL}/api/ingredients`);
       const data = await response.json();
       setIngredients(data);
     } catch (error) {
@@ -135,7 +136,7 @@ const Admin = () => {
         ingredients: selectedIngredients
       });
 
-      const response = await fetch('http://localhost:5000/api/recipes', {
+      const response = await fetch(`${API_BASE_URL}/api/recipes`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

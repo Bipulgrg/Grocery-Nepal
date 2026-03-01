@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './ManageUsers.css';
+import { API_BASE_URL } from '../../config/api';
 
 const ManageUsers = () => {
   const location = useLocation();
@@ -18,11 +19,12 @@ const ManageUsers = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
@@ -41,12 +43,13 @@ const ManageUsers = () => {
     setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Failed to delete user');

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './Purchase.css';
+import { API_BASE_URL } from '../../config/api';
 
 // Utility function to decode JWT token
 const decodeJWT = (token) => {
@@ -84,7 +85,7 @@ const Purchase = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/recipes/${id}`);
       
       if (!response.ok) {
         if (response.status === 404) throw new Error('Recipe not found');
@@ -201,7 +202,7 @@ const Purchase = () => {
       };
 
       // Create the order first
-      const orderResponse = await fetch('http://localhost:5000/api/orders', {
+      const orderResponse = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -219,7 +220,7 @@ const Purchase = () => {
       console.log('Order created successfully:', createdOrder);
 
       // Now initiate eSewa payment using the order ID
-      const response = await fetch('http://localhost:5000/initiate-payment', {
+      const response = await fetch(`${API_BASE_URL}/initiate-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -312,7 +313,7 @@ const Purchase = () => {
 
         console.log('Sending COD order data:', orderData); // Debug log
 
-        const response = await fetch('http://localhost:5000/api/orders', {
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

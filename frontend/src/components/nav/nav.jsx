@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './nav.css';
+import { API_BASE_URL } from '../../config/api';
 
 const Nav = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,7 +40,7 @@ const Nav = () => {
   const fetchCartData = async (token) => {
     try {
       setCartLoading(true);
-      const response = await fetch('http://localhost:5000/api/cart', {
+      const response = await fetch(`${API_BASE_URL}/api/cart`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

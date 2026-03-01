@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUtensils, FaLeaf, FaHeartbeat, FaBirthdayCake, FaCoffee, FaGlassMartiniAlt, FaCookie } from 'react-icons/fa';
 import './Categories.css';
+import { API_BASE_URL } from '../../config/api';
 
 const Categories = () => {
   const [categoryStats, setCategoryStats] = useState([]);
@@ -12,7 +13,7 @@ const Categories = () => {
     const fetchCategoryStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/dashboard/recipes/category-stats', {
+        const response = await fetch(`${API_BASE_URL}/api/dashboard/recipes/category-stats`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

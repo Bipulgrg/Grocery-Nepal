@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ManageIngredients.css';
+import { API_BASE_URL } from '../../config/api';
 
 const ManageIngredients = () => {
   const [ingredients, setIngredients] = useState([]);
@@ -13,7 +14,7 @@ const ManageIngredients = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/ingredients');
+      const response = await fetch(`${API_BASE_URL}/api/ingredients`);
       if (!response.ok) {
         throw new Error('Failed to fetch ingredients');
       }
@@ -32,7 +33,7 @@ const ManageIngredients = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/ingredients/${ingredientId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/ingredients/${ingredientId}`, {
         method: 'DELETE'
       });
 
@@ -54,7 +55,7 @@ const ManageIngredients = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`http://localhost:5000/api/ingredients/${editingIngredient._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/ingredients/${editingIngredient._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

@@ -13,35 +13,33 @@ const cartRoutes = require('./routes/cart');
 const userRoutes = require('./routes/users');
 
 dotenv.config();
+
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true
+  })
+);
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const connectDB = async () => {
   try {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI);
-      console.log('MongoDB connected');
-    }
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err);
-    // Don't exit in serverless - let requests fail gracefully
   }
 };
 
 connectDB();
 
-// Health check (no DB required)
-app.get('/', (req, res) => res.json({ ok: true, message: 'Backend is running' }));
-
-// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/ingredients', ingredientRoutes);
@@ -51,7 +49,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/users', profileRoutes);
 
-// Esewa payment routes
 app.post('/initiate-payment', EsewaInitiatePayment);
 app.post('/payment-status', paymentStatus);
 

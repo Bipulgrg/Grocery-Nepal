@@ -1,5 +1,5 @@
 import React from "react";
-import './homePage.css';
+import './homepage.css';
 import PopularCategories from "../../components/PopularCategories/PopularCategories";
 import FeaturedRecipes from "../../components/FeaturedRecipes/FeaturedRecipes";
 

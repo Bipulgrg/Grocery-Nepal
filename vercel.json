@@ -1,9 +1,9 @@
 {
   "version": 2,
+  "installCommand": "npm install --prefix backend",
   "functions": {
     "api/backend.js": {
       "runtime": "nodejs18.x"
     }
   }
 }
-
